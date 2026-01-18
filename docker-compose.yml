@@ -24,5 +24,21 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # Evita que los archivos locales sobrescriban las librerías del contenedor
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api # URL para que el navegador encuentre el backend
+    depends_on:
+      - app
+
 volumes:
   postgres_data:
+
+
