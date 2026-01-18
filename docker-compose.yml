@@ -1,15 +1,28 @@
 services:
-  backend:
-    build: ./backend
+  app:
+    build:
+      context: ./backend # IMPORTANTE: Indica que el Dockerfile está dentro de la carpeta backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend:/var/www/html # Sincroniza tu carpeta local con el contenedor
     ports:
       - "8000:8000"
+    depends_on:
+      - db
+    env_file:
+      - ./backend/.env # Usa el archivo .env que está dentro de backend
+
+  # La base de datos (PostgreSQL)
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: laravel_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: jF2811
+    ports:
+      - "5432:5432"
     volumes:
-      - ./backend:/app
-  #frontend:
-  #  build: ./frontend
-  #  ports:
-  #    - "3000:3000"
-  #  volumes:
-  #    - ./frontend:/app
-  #  environment:
-  #    - BACKEND_URL=http://backend:8000
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
