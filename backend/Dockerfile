@@ -21,7 +21,7 @@ WORKDIR /var/www/html
 COPY composer.json composer.lock ./
 
 # Instalamos dependencias (esto usará el compose.lock)
-RUN composer install --no-scripts --no-autoloader
+#RUN composer install --no-scripts --no-autoloader #descomentar cuando el backend resuelva el problema con compose.lock
 
 # Ahora copiamos el resto del código
 COPY . .
