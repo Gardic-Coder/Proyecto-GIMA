@@ -1,0 +1,41 @@
+# --- Docker & System ---
+.env
+.env.local
+.docker/
+docker-compose.override.yml
+.DS_Store
+Thumbs.db
+
+# --- Backend (Laravel) ---
+backend/.env
+backend/vendor/
+backend/storage/*.key
+backend/storage/framework/cache/data/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/storage/logs/*
+backend/bootstrap/cache/*
+backend/public/storage
+backend/public/hot
+backend/.phpunit.result.cache
+
+# --- Frontend (Next.js) ---
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.vercel
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# --- Herramientas de Desarrollo ---
+.vscode/
+.idea/
+*.swp
+*.bak

@@ -6,7 +6,7 @@ services:
     volumes:
       - ./backend:/var/www/html # Sincroniza tu carpeta local con el contenedor
     ports:
-      - "8000:8000"
+      - "${PORT_BACKEND}:8000"
     depends_on:
       - db
     env_file:
@@ -16,13 +16,29 @@ services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_DB: laravel_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: jF2811
+      POSTGRES_DB: ${DOCKER_DB_NAME}
+      POSTGRES_USER: ${DOCKER_DB_USER}
+      POSTGRES_PASSWORD: ${DOCKER_DB_PASSWORD}
     ports:
-      - "5432:5432"
+      - "${PORT_POSTGRES}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # Evita que los archivos locales sobrescriban las librerías del contenedor
+    ports:
+      - "${PORT_FRONTEND}:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:${PORT_BACKEND}/api # URL para que el navegador encuentre el backend
+    depends_on:
+      - app
+
 volumes:
   postgres_data:
+
+
