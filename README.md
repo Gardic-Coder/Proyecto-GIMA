@@ -109,17 +109,10 @@ Esta lista se actualiza conforme unimos piezas del puzzle.
 
 ### ⚙️ Backend API (Laravel - Puerto 8000)
 
-*Prefijo de ruta: `http://localhost:8000/api*`
+*Prefijo de ruta: `http://localhost:8000/api`*
 
 | Método | Endpoint | Descripción |
 | --- | --- | --- |
 | **POST** | `/autenticacion/iniciar-sesion` | Login (Retorna Token y Usuario) |
 | **GET** | `/autenticacion/perfil` | Datos del usuario logueado |
 
----
-
-
-
-**Nota:** Si tienes dudas sobre cómo conectar una nueva vista, consulta el componente `<AuthGuard />` en la carpeta de componentes.
-
----
