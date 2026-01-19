@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, User, Lock, ArrowRight } from "lucide-react";
@@ -15,15 +15,58 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  //useEffect(() => {
+  //  const token = localStorage.getItem("token");
+  //  if (token) {
+  // Si ya hay un token, mandamos al usuario al dashboard
+  //    router.push("/dashboard");
+  //  }
+  //}, [router]);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
+    try {
+      const response = await fetch("http://localhost:8000/api/autenticacion/iniciar-sesion", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.estado === "exito") {
+        // LOGIN EXITOSO
+        console.log("Token recibido:", result.data.token);
+        alert(result.mensaje);
+        // Aquí podrías guardar el token en localStorage o cookies
+        localStorage.setItem("token", result.data.token);
+
+        // Guardar los datos del usuario (para saber el rol luego)
+        localStorage.setItem("user", JSON.stringify(result.data));
+
+        // Redirigir (usando el hook useRouter de Next.js)
+        router.push("/dashboard");
+      } else {
+        // LOGIN FALLIDO (401 u otros)
+        alert(result.mensaje || "Error al iniciar sesión");
+      }
+
+    } catch (error) {
+      console.error("Error de conexión:", error);
+      alert("No se pudo conectar con el servidor");
+    } finally {
+      setIsLoading(false);
+    }
     // Simulate authentication delay
-    setTimeout(() => {
-      // Redirect to dashboard on successful login
-      router.push("/dashboard");
-    }, 500);
+    //setTimeout(() => {
+    // Redirect to dashboard on successful login
+    //router.push("/dashboard");
+    //}, 500);
   };
 
   return (
@@ -139,7 +182,7 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Pedro_perez"
+                  placeholder="Pedro@ejemplo.com"
                   className="w-full pl-12 pr-4 py-3 bg-gray-100 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
                   required
                 />
