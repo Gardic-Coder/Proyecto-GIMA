@@ -84,6 +84,7 @@ Esta lista se actualiza conforme unimos piezas del puzzle.
 * [x] **Persistencia:** Gestión de Tokens JWT/Sanctum en `localStorage`.
 * [x] **Protección de Rutas:** Middleware `AuthGuard` operativo para restringir accesos.
 * [x] **Gestión de Sesión:** Funcionalidad de Logout y redirección automática.
+* [ ] **AuthContext:** Funcion para obtener el usuario logueado y que su informacion este disponible en el frontend. (En proceso...)
 * [ ] **Dashboard General:** (En proceso...)
 * [ ] **Otras funcionalidades:** (Pendiente de integración...)
 
