@@ -15,13 +15,13 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  //useEffect(() => {
-  //  const token = localStorage.getItem("token");
-  //  if (token) {
-  // Si ya hay un token, mandamos al usuario al dashboard
-  //    router.push("/dashboard");
-  //  }
-  //}, [router]);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      // Si ya hay un token, mandamos al usuario al dashboard
+      router.push("/dashboard");
+    }
+  }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,11 +62,7 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false);
     }
-    // Simulate authentication delay
-    //setTimeout(() => {
-    // Redirect to dashboard on successful login
-    //router.push("/dashboard");
-    //}, 500);
+
   };
 
   return (

@@ -51,7 +51,7 @@ export function Sidebar() {
 
   const handleLogout = () => {
     // Aquí puedes agregar lógica de limpieza de tokens si es necesario
-    router.push("/auth/login");
+    router.push("/logout");
   };
 
   return (
@@ -79,7 +79,7 @@ export function Sidebar() {
             priority
           />
         </div>
-        
+
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="p-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white"
@@ -109,9 +109,9 @@ export function Sidebar() {
               )}
             >
               <div className="min-w-6"> {/* Contenedor fijo para evitar saltos */}
-                <Icon size={20} className={cn(isActive && "animate-pulse-once")} /> 
+                <Icon size={20} className={cn(isActive && "animate-pulse-once")} />
               </div>
-              
+
               <span
                 className={cn(
                   "transition-all duration-300 origin-left",
@@ -136,13 +136,13 @@ export function Sidebar() {
           title="Cerrar sesión"
         >
           <div className="min-w-6">
-             <LogOut size={20} />
+            <LogOut size={20} />
           </div>
           <span
-             className={cn(
-               "transition-all duration-300",
-               isOpen ? "opacity-100" : "opacity-0 w-0 hidden"
-             )}
+            className={cn(
+              "transition-all duration-300",
+              isOpen ? "opacity-100" : "opacity-0 w-0 hidden"
+            )}
           >
             Cerrar sesión
           </span>
