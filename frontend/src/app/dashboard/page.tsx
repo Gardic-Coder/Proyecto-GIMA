@@ -9,7 +9,7 @@ export default function DashboardPage() {
   return (
     <AuthGuard>
       <div className="min-h-screen">
-        <DashboardHeader title="Dashboard" subtitle="Bienvenido al panel GIMA" />
+        <DashboardHeader subtitle="Bienvenido al panel GIMA" />
 
         <div className="p-8 space-y-8">
           {/* Stats Grid */}

@@ -1,52 +1,25 @@
 "use client"
 
-import { useEffect, useState } from 'react';
+//import { useEffect, useState } from 'react';
 import { Bell, User, Search } from "lucide-react"
+import { usePathname } from "next/navigation"
 
 interface DashboardHeaderProps {
-  title?: string
   subtitle?: string
 }
 
-export function DashboardHeader({ title = "Dashboard", subtitle = "Bienvenido al panel GIMA" }: DashboardHeaderProps) {
-  const [userName, setUserName] = useState<string>("Usuario");
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const token = localStorage.getItem("token");
-
-      if (!token) return;
-
-      try {
-        const response = await fetch("http://localhost:8000/api/autenticacion/perfil", {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Accept": "application/json",
-          },
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          if (result.estado === "exito") {
-            setUserName(result.data.name);
-            // Opcional: Actualizar el 'user' en localStorage con info fresca
-            localStorage.setItem("user", JSON.stringify(result.data));
-          }
-        }
-      } catch (error) {
-        console.error("Error al obtener perfil:", error);
-      }
-    };
-
-    fetchUserData();
-  }, []);
+export function DashboardHeader({ subtitle = "Bienvenido al panel GIMA" }: DashboardHeaderProps) {
+  const pathname = usePathname()
+  const pathParts = pathname.split("/").filter((part) => part)
+  const lastPart = pathParts.length > 0 ? pathParts[pathParts.length - 1] : "Dashboard"
+  const title = lastPart.charAt(0).toUpperCase() + lastPart.slice(1)
 
   return (
     <div className="bg-white border-b border-gray-200 px-8 py-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Hola, {userName}!</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
           <p className="text-gray-600 mt-1">{subtitle}</p>
         </div>
 
