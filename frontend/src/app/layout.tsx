@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { AuthProvider } from '@/context/AuthContext';
 // @ts-expect-error: allow side-effect CSS import without type declarations
 import "./globals.css";
 
@@ -31,7 +32,9 @@ export default function RootLayout({
       <body
         className={`${microgramma.variable} ${archivo.variable} antialiased bg-gima-light`}
       >
-        <MainLayout>{children}</MainLayout>
+        <AuthProvider>
+          <MainLayout>{children}</MainLayout>
+        </AuthProvider>
       </body>
     </html>
   );
