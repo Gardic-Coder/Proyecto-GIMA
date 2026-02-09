@@ -7,7 +7,7 @@ import AuthGuard from "@/components/AuthGuard"
 
 export default function DashboardPage() {
   return (
-    <AuthGuard>
+    <AuthGuard roleRequired="admin">
       <div className="min-h-screen">
         <DashboardHeader subtitle="Bienvenido al panel GIMA" />
 

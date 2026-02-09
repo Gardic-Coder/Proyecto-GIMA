@@ -20,7 +20,7 @@ export default function AuthGuard({ children, roleRequired }: AuthGuardProps) {
                 router.push("/auth/login");
             } else if (roleRequired && !user.roles?.includes(roleRequired)) {
                 // Si hay usuario pero no tiene el rol necesario
-                router.push("/auth/login");
+                router.push("/unauthorized");
             }
         }
     }, [user, isLoading, roleRequired, router]);

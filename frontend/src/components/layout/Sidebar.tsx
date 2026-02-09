@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
+import RoleGuard from '@/components/RoleGuard';
 import {
   LayoutDashboard,
   Box,        // Usé Box para activos (más genérico)
