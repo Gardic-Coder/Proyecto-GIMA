@@ -41,10 +41,16 @@ class UserController extends Controller
      *     @OA\Response(response=403, description="Acceso denegado")
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Eager load roles to prevent N+1 queries
-        return UserResource::collection(User::with('roles')->paginate(15));
+        // 1. Capturar el valor de la query o usar 15 por defecto
+        // 2. Usar clamp o min/max para asegurar el rango de 5 a 30
+        $perPage = $request->query('per_page', 15);
+        $perPage = max(5, min(30, (int) $perPage));
+        // 3. Aplicar el valor dinámico a la paginación
+        return UserResource::collection(
+            User::with('roles')->paginate($perPage)
+        );
     }
 
     /**
