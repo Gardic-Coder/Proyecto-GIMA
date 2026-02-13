@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\StoreUserRequest;
-use App\Http\Requests\Admin\UpdateUserRequest;
+// use App\Http\Requests\Admin\StoreUserRequest;
+// use App\Http\Requests\Admin\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Enum;
 
 /**
  * @OA\Tag(
@@ -21,10 +23,28 @@ class UserController extends Controller
     /**
      * @OA\Get(
      *     path="/api/admin/users",
-     *     summary="Obtener una lista paginada de usuarios",
+     *     summary="Obtener una lista paginada y filtrada de usuarios",
+     *     description="Retorna una lista de usuarios. Soporta paginación dinámica y búsqueda por nombre o correo electrónico.",
      *     tags={"Administración - Usuarios"},
      *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(name="page", in="query", description="Número de página", @OA\Schema(type="integer")),
+     *     @OA\Parameter(
+     *     name="page", 
+     *     in="query", 
+     *     description="Número de página", 
+     *     @OA\Schema(type="integer", default =1)
+     *     ),
+     *     @OA\Parameter(
+     *     name="per_page", 
+     *     in="query", 
+     *     description="Cantidad de registros por página (mínimo 5, máximo 30)", 
+     *     @OA\Schema(type="integer", default =15)
+     *     ),
+     *     @OA\Parameter(
+     *     name="search", 
+     *     in="query", 
+     *     description="Término de búsqueda para filtrar por coincidencia parcial en nombre o email", 
+     *     @OA\Schema(type="string", nullable=true
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Lista de usuarios obtenida exitosamente",
@@ -39,10 +59,25 @@ class UserController extends Controller
      *     @OA\Response(response=403, description="Acceso denegado")
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Eager load roles to prevent N+1 queries
-        return UserResource::collection(User::with('roles')->paginate(15));
+        // 1. Capturamos los parámetros
+        $perPage = max(5, min(30, (int) $request->query('per_page', 15)));
+        $search = $request->query('search');
+
+        // 2. Preparamos la consulta base
+        $query = User::with('roles');
+
+        // 3. Si hay una búsqueda, aplicamos el filtro en la base de datos
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'ilike', "%{$search}%")
+                    ->orWhere('email', 'ilike', "%{$search}%");
+            });
+        }
+
+        // 4. Paginamos el resultado filtrado
+        return UserResource::collection($query->paginate($perPage));
     }
 
     /**
@@ -159,7 +194,7 @@ class UserController extends Controller
             'email' => 'sometimes|required|email|unique:users,email,' . $user->id,
             'password' => 'sometimes|nullable|string|min:8|confirmed',
             'telefono' => 'sometimes|nullable|string|max:20',
-            'estado' => 'sometimes|required|in:activo,inactivo,pendiente,rechazado',
+            'estado' => ['sometimes', 'required', new Enum(UserStatusEnum::class)],
             'roles' => 'sometimes|array',
             'roles.*' => 'string|exists:roles,name',
         ]);

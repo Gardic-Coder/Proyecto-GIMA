@@ -1,15 +1,15 @@
 "use client"
 
-import { DashboardHeader } from "@/components/ui/dashboard-header"
-import { StatCard } from "@/components/ui/stat-card"
-import { ChartPlaceholder } from "@/components/ui/chart-placeholder"
+import { DashboardHeader } from "@/components/layout/DashboardHeader"
+import { StatCard } from "@/components/dashboard/StatCard"
+import { ChartPlaceholder } from "@/components/ui/ChartPlaceholder"
 import AuthGuard from "@/components/AuthGuard"
 
 export default function DashboardPage() {
   return (
-    <AuthGuard>
+    <AuthGuard roleRequired="admin">
       <div className="min-h-screen">
-        <DashboardHeader title="Dashboard" subtitle="Bienvenido al panel GIMA" />
+        <DashboardHeader subtitle="Bienvenido al panel GIMA" />
 
         <div className="p-8 space-y-8">
           {/* Stats Grid */}

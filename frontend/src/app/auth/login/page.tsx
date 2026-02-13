@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, User, Lock, ArrowRight } from "lucide-react";
 import Image from "next/image";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,14 +15,14 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { login, user } = useAuth(); // Importa el hook y user
 
-  //useEffect(() => {
-  //  const token = localStorage.getItem("token");
-  //  if (token) {
-  // Si ya hay un token, mandamos al usuario al dashboard
-  //    router.push("/dashboard");
-  //  }
-  //}, [router]);
+  useEffect(() => {
+    if (user) {
+      // Si el contexto ya tiene al usuario, mándalo al dashboard
+      router.push("/dashboard");
+    }
+  }, [user, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,19 +41,9 @@ export default function LoginPage() {
       const result = await response.json();
 
       if (response.ok && result.estado === "exito") {
-        // LOGIN EXITOSO
-        console.log("Token recibido:", result.data.token);
-        alert(result.mensaje);
-        // Aquí podrías guardar el token en localStorage o cookies
-        localStorage.setItem("token", result.data.token);
-
-        // Guardar los datos del usuario (para saber el rol luego)
-        localStorage.setItem("user", JSON.stringify(result.data));
-
-        // Redirigir (usando el hook useRouter de Next.js)
-        router.push("/dashboard");
+        // Usamos la función del contexto que ya guarda en localStorage y redirige
+        login(result.data); 
       } else {
-        // LOGIN FALLIDO (401 u otros)
         alert(result.mensaje || "Error al iniciar sesión");
       }
 
@@ -62,11 +53,7 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false);
     }
-    // Simulate authentication delay
-    //setTimeout(() => {
-    // Redirect to dashboard on successful login
-    //router.push("/dashboard");
-    //}, 500);
+
   };
 
   return (

@@ -1,22 +1,17 @@
 'use client';
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext'; // Importamos el contexto
 
 export default function LogoutPage() {
-    const router = useRouter();
+    const { logout } = useAuth(); // Usamos la función centralizada
 
     useEffect(() => {
-        // 1. Limpiamos los datos de sesión de la memoria del navegador
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-
-        // 2. Pequeña pausa opcional para que el usuario vea el mensaje y redirigimos
         const timer = setTimeout(() => {
-            router.push("/auth/login");
+            logout(); // Esto limpia localStorage, limpia el estado y redirige
         }, 1000);
 
         return () => clearTimeout(timer);
-    }, [router]);
+    }, [logout]);
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">

@@ -13,6 +13,26 @@ use App\Enums\UserStatusEnum;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+
+/**
+ * @OA\Schema(
+ * title="User",
+ * description="Modelo de Usuario",
+ * @OA\Xml(name="User"),
+ * @OA\Property(property="id", type="integer", example=1),
+ * @OA\Property(property="name", type="string", example="Juan Perez"),
+ * @OA\Property(property="email", type="string", format="email", example="juan@gima.com"),
+ * @OA\Property(property="email_verified_at", type="string", format="date-time", nullable=true),
+ * @OA\Property(property="created_at", type="string", format="date-time"),
+ * @OA\Property(property="updated_at", type="string", format="date-time"),
+ * @OA\Property(property="telefono", type="string", example="+584141234567"),
+ * @OA\Property(property="estado", type="string", example="activo"),
+ * @OA\Property(property="roles", type="array", @OA\Items(type="string"), example={"admin"})
+ * )
+ */
+
+
+
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -28,6 +48,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'recovery_pin',
         'telefono',
         'estado',
         'fecha_aprobacion',
@@ -41,6 +62,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'recovery_pin',
     ];
 
     /**
@@ -59,7 +81,7 @@ class User extends Authenticatable
     }
 
     //Relación con el mismo modelo User para el campo aprobado_por
-
+    /* 
     public function aprobador(): BelongsTo
     {
         return $this->belongsTo(User::class, 'aprobado_por');
@@ -69,7 +91,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(User::class, 'aprobado_por');
     }
-
+ */
     //Relación con el modelo SesionesMantenimiento
     public function sesionesMantenimiento(): HasMany
     {
@@ -79,7 +101,7 @@ class User extends Authenticatable
     //Relación con el modelo Auditorias
     public function auditorias(): HasMany
     {
-        return $this->hasMany(Auditoria::class, 'usuario_id');
+        return $this->hasMany(HistorialLogs::class, 'usuario_id');
     }
 
     //Relación con el modelo Notificaciones
