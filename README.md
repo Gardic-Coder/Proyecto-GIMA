@@ -9,23 +9,24 @@ Bienvenido al repositorio central de **Proyecto-GIMA**. Este entorno utiliza con
 Sigue estos pasos para configurar tu entorno por primera vez:
 
 1. **Variables de Entorno del Ecosistema:**
-En la raíz del proyecto, crea un archivo `.env` basado en el ejemplo para configurar la Base de Datos en Docker:
-* Copia el archivo: `cp .env.example .env` (o créalo manualmente).
-* Define tus credenciales de PostgreSQL en este archivo. El `docker-compose.yml` las leerá automáticamente.
+   En la raíz del proyecto, crea un archivo `.env` basado en el ejemplo para configurar la Base de Datos en Docker:
 
+- Copia el archivo: `cp .env.example .env` (o créalo manualmente).
+- Define tus credenciales de PostgreSQL en este archivo. El `docker-compose.yml` las leerá automáticamente.
 
 2. **Variables de Entorno del Backend:**
-Entra a la carpeta `backend/` y prepara su configuración:
-* `cp backend/.env.example backend/.env`
-* **Importante:** Asegúrate de que los valores de `DB_DATABASE`, `DB_USERNAME` y `DB_PASSWORD` coincidan con los que pusiste en el `.env` de la raíz. El `DB_HOST` debe ser `db`.
+   Entra a la carpeta `backend/` y prepara su configuración:
 
+- `cp backend/.env.example backend/.env`
+- **Importante:** Asegúrate de que los valores de `DB_DATABASE`, `DB_USERNAME` y `DB_PASSWORD` coincidan con los que pusiste en el `.env` de la raíz. El `DB_HOST` debe ser `db`.
 
 3. **Levantar Contenedores:**
-* **Linux/macOS:** `docker compose up -d --build`
-* **Windows:** `docker-compose up -d --build`
 
+- **Linux/macOS:** `docker compose up -d --build`
+- **Windows:** `docker-compose up -d --build`
 
 4. **Migraciones y Datos iniciales:**
+
 ```bash
 docker compose exec app php artisan key:generate
 docker compose exec app php artisan migrate --seed
@@ -36,15 +37,15 @@ docker compose exec app php artisan migrate --seed
 
 ## 📖 Diccionario de Comandos Útiles
 
-| Acción | Comando |
-| --- | --- |
-| **Ver Logs (Errores)** | `docker compose logs -f [servicio]` (servicios: `app`, `frontend`, `db`) |
-| **Instalar dependencias Backend** | `docker run --rm -v $(pwd)/backend:/app composer install` |
-| **Instalar dependencias Frontend** | `docker run --rm -v $(pwd)/frontend:/app -w /app node:20 npm install` |
-| **Detener todo** | `docker compose down` |
-| **Acceso manual a DB** | Usar **DBeaver** en `localhost:5432` con las credenciales del `.env` |
-| **Reiniciar Servicio:** | `docker compose restart [servicio]` |
-| **Limpiar Docker:** | `docker system prune` (Uso con precaución) |
+| Acción                             | Comando                                                                  |
+| ---------------------------------- | ------------------------------------------------------------------------ |
+| **Ver Logs (Errores)**             | `docker compose logs -f [servicio]` (servicios: `app`, `frontend`, `db`) |
+| **Instalar dependencias Backend**  | `docker run --rm -v $(pwd)/backend:/app composer install`                |
+| **Instalar dependencias Frontend** | `docker run --rm -v $(pwd)/frontend:/app -w /app node:20 npm install`    |
+| **Detener todo**                   | `docker compose down`                                                    |
+| **Acceso manual a DB**             | Usar **DBeaver** en `localhost:5432` con las credenciales del `.env`     |
+| **Reiniciar Servicio:**            | `docker compose restart [servicio]`                                      |
+| **Limpiar Docker:**                | `docker system prune` (Uso con precaución)                               |
 
 ---
 
@@ -64,14 +65,13 @@ Para mantener la integridad del sistema durante la integración, todos los miemb
 
 Para evitar conflictos y mantener el historial limpio, sigue estas reglas:
 
-* **Ramas de Trabajo:** Crea una rama propia para cada funcionalidad: `feature/nombre-de-la-tarea`.
-* **Commits Semánticos:** Usa mensajes descriptivos:
-* `feat:` para nuevas funcionalidades.
-* `fix:` para corregir errores.
-* `docs:` para cambios en documentación.
+- **Ramas de Trabajo:** Crea una rama propia para cada funcionalidad: `feature/nombre-de-la-tarea`.
+- **Commits Semánticos:** Usa mensajes descriptivos:
+- `feat:` para nuevas funcionalidades.
+- `fix:` para corregir errores.
+- `docs:` para cambios en documentación.
 
-
-* **Prohibido Push Directo:** Nunca hagas push directo a la rama principal de integración. Solicita un Code Review.
+- **Prohibido Push Directo:** Nunca hagas push directo a la rama principal de integración. Solicita un Code Review.
 
 ---
 
@@ -79,22 +79,28 @@ Para evitar conflictos y mantener el historial limpio, sigue estas reglas:
 
 Esta lista se actualiza conforme unimos piezas del puzzle.
 
-* [x] **Infraestructura:** Dockerización de Fullstack (PHP 8.2, Node 20, Postgres 15).
-* [x] **Seguridad Base:** Sistema de Autenticación (Login) conectado con Backend.
-* [x] **Persistencia:** Gestión de Tokens JWT/Sanctum en `localStorage`.
-* [x] **Protección de Rutas:** Middleware `AuthGuard` operativo para restringir accesos.
-* [x] **Gestión de Sesión:** Funcionalidad de Logout y redirección automática.
-* [ ] **AuthContext:** Funcion para obtener el usuario logueado y que su informacion este disponible en el frontend. (En proceso...)
-* [ ] **Dashboard General:** (En proceso...)
-* [ ] **Otras funcionalidades:** (Pendiente de integración...)
+- [x] **Infraestructura:** Dockerización de Fullstack (PHP 8.2, Node 20, Postgres 15).
+- [x] **Seguridad Base:** Sistema de Autenticación (Login) conectado con Backend.
+- [x] **Persistencia:** Gestión de Tokens JWT/Sanctum en `localStorage`.
+- [x] **Protección de Rutas:** Middleware `AuthGuard` operativo para restringir accesos.
+- [x] **Gestión de Sesión:** Funcionalidad de Logout y redirección automática.
+- [x] **Estado Global de Autenticación:** Implementación de `AuthContext` para disponibilidad centralizada de datos de sesión.
+- [x] **Gestión de Usuarios (CRUD):** Integración completa de listado, creación, edición y eliminación de usuarios con la API REST.
+- [x] **Búsqueda Optimizada:** Filtrado real en base de datos conectado al Frontend mediante técnica de _Debounce_ para reducir carga en el servidor.
+- [x] **Paginación Reutilizable:** Componente modular `<Pagination />` con control de registros por página, salto directo y memoria en `localStorage`.
+- [x] **Experiencia de Usuario (UX):** Modales de confirmación (`DeleteAlert`), estados de carga (`LoadingSpinner`) y manejo de errores.
+- [ ] **Control de Acceso por Roles:** Renderizado condicional del Sidebar y protección de componentes mediante `RoleGuard`.
+- [ ] **Dashboard General:** (En proceso...)
+- [ ] **Gestión de Activos:** (Pendiente de integración...)
+- [ ] **Módulo de Mantenimiento:** (Pendiente de integración...)
 
 ---
 
 ## 🌐 Direcciones Locales
 
-* **Frontend:** [http://localhost:3000](https://www.google.com/search?q=http://localhost:3000)
-* **Backend API:** [http://localhost:8000](https://www.google.com/search?q=http://localhost:8000)
-* **DB Host:** `localhost` | **Port:** `5432`
+- **Frontend:** [http://localhost:3000](https://www.google.com/search?q=http://localhost:3000)
+- **Backend API:** [http://localhost:8000](https://www.google.com/search?q=http://localhost:8000)
+- **DB Host:** `localhost` | **Port:** `5432`
 
 ---
 
@@ -102,18 +108,23 @@ Esta lista se actualiza conforme unimos piezas del puzzle.
 
 ### 🖥️ Frontend (Next.js - Puerto 3000)
 
-| Ruta | Descripción | Acceso |
-| --- | --- | --- |
-| `/auth/login` | Formulario de acceso | Público |
-| `/logout` | Cierre de sesión y limpieza | Público |
-| `/dashboard` | Panel principal del sistema | Solo Logueados |
+| Ruta                  | Descripción                                  | Acceso                        |
+| --------------------- | -------------------------------------------- | ----------------------------- |
+| `/auth/login`         | Formulario de acceso                         | Público                       |
+| `/logout`             | Cierre de sesión y limpieza                  | Público                       |
+| `/dashboard`          | Panel principal del sistema                  | Solo Logueados                |
+| `/unauthorized`       | Pantalla de "Acceso Denegado"                | Solo Logueados (Sin permisos) |
+| `/configuracion/User` | Tabla CRUD de gestión de personal y permisos | Logueados (Rol: `admin`)      |
 
 ### ⚙️ Backend API (Laravel - Puerto 8000)
 
-*Prefijo de ruta: `http://localhost:8000/api`*
+_Prefijo de ruta: `http://localhost:8000/api`_
 
-| Método | Endpoint | Descripción |
-| --- | --- | --- |
-| **POST** | `/autenticacion/iniciar-sesion` | Login (Retorna Token y Usuario) |
-| **GET** | `/autenticacion/perfil` | Datos del usuario logueado |
-
+| Método     | Endpoint                        | Descripción                                                             |
+| ---------- | ------------------------------- | ----------------------------------------------------------------------- |
+| **POST**   | `/autenticacion/iniciar-sesion` | Login (Retorna Token y Usuario)                                         |
+| **GET**    | `/autenticacion/perfil`         | Datos del usuario logueado                                              |
+| **GET**    | `/admin/users`                  | Lista usuarios. Acepta query params: `?page=1&per_page=15&search=texto` |
+| **POST**   | `/admin/users`                  | Crea un nuevo usuario. (Asigna contraseña por defecto temporalmente)    |
+| **PUT**    | `/admin/users/{id}`             | Actualiza datos y/o roles de un usuario existente                       |
+| **DELETE** | `/admin/users/{id}`             | Elimina un usuario del sistema (Retorna 204 No Content)                 |

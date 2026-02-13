@@ -23,10 +23,28 @@ class UserController extends Controller
     /**
      * @OA\Get(
      *     path="/api/admin/users",
-     *     summary="Obtener una lista paginada de usuarios",
+     *     summary="Obtener una lista paginada y filtrada de usuarios",
+     *     description="Retorna una lista de usuarios. Soporta paginación dinámica y búsqueda por nombre o correo electrónico.",
      *     tags={"Administración - Usuarios"},
      *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(name="page", in="query", description="Número de página", @OA\Schema(type="integer")),
+     *     @OA\Parameter(
+     *     name="page", 
+     *     in="query", 
+     *     description="Número de página", 
+     *     @OA\Schema(type="integer", default =1)
+     *     ),
+     *     @OA\Parameter(
+     *     name="per_page", 
+     *     in="query", 
+     *     description="Cantidad de registros por página (mínimo 5, máximo 30)", 
+     *     @OA\Schema(type="integer", default =15)
+     *     ),
+     *     @OA\Parameter(
+     *     name="search", 
+     *     in="query", 
+     *     description="Término de búsqueda para filtrar por coincidencia parcial en nombre o email", 
+     *     @OA\Schema(type="string", nullable=true
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Lista de usuarios obtenida exitosamente",
