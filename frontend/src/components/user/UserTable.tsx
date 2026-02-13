@@ -10,6 +10,7 @@ import { userService } from '@/services/userService';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { getIniciales } from '@/utils/formatters';
 import DeleteAlerta from '@/components/ui/DeleteAlerta';
+import Pagination from '@/components/ui/Paginacion';
 
 export default function UserTable() {
     const { user: currentUser } = useAuth();
@@ -30,6 +31,7 @@ export default function UserTable() {
     // --- ESTADOS PARA PAGINACIÓN ---
     const [paginaActual, setPaginaActual] = useState(1);
     const [totalPaginas, setTotalPaginas] = useState(1);
+    const [porPagina, setPorPagina] = useState(5); // Opcional: para cambiar cuántos ver a la vez
 
     // --- CARGA DE DATOS ---
     useEffect(() => {
@@ -40,7 +42,7 @@ export default function UserTable() {
             setIsLoading(true);
             
             // Llamamos al backend enviando la página y la búsqueda actual
-            userService.getAll(currentUser.token, paginaActual, 5, busqueda)
+            userService.getAll(currentUser.token, paginaActual, porPagina, busqueda)
                 .then((resultado) => {
                     setUsers(resultado.usuarios);
                     setTotalPaginas(resultado.meta.last_page); // Guardamos cuantas páginas hay en total
@@ -226,6 +228,16 @@ export default function UserTable() {
                         )}
                         </tbody>
                     </table>
+                    <Pagination 
+                        paginaActual={paginaActual}
+                        totalPaginas={totalPaginas}
+                        porPagina={porPagina}
+                        onPageChange={(nuevaPagina) => setPaginaActual(nuevaPagina)}
+                        onPerPageChange={(nuevoPorPagina) => {
+                            setPorPagina(nuevoPorPagina);
+                            setPaginaActual(1); // Siempre que cambie la cantidad, volvemos a la pag 1
+                        }}
+                    />
                 </div>
 
                 {/* Agregar el modal aquí (sin cambiar estilos existentes) */}
