@@ -34,7 +34,7 @@ export const userService = {
         email: u.email,
         rol: u.roles[0] || 'Sin rol',
         department: 'N/A', 
-        status: u.estado === 'activo' ? 'available' : 'unavailable',
+        status: u.estado,
       })),
       meta: result.meta // Pasamos el meta para usarlo en el paginador del frontend
     };

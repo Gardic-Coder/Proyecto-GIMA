@@ -1,4 +1,5 @@
 'use client';
+import { useState, useEffect } from 'react';
 
 interface PaginationProps {
     paginaActual: number;
@@ -15,12 +16,32 @@ export default function Pagination({
     onPageChange,
     onPerPageChange
 }: PaginationProps) {
-    
-    // Función segura para manejar el input manual de página
-    const handleInputPageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const valor = parseInt(e.target.value);
-        if (!isNaN(valor) && valor >= 1 && valor <= totalPaginas) {
-            onPageChange(valor);
+
+    // Estado local para lo que el usuario escribe en el input antes de presionar Enter
+    const [inputValue, setInputValue] = useState(paginaActual.toString());
+
+    // Si la página cambia desde afuera (ej. botones Anterior/Siguiente), actualizamos el input
+    useEffect(() => {
+        setInputValue(paginaActual.toString());
+    }, [paginaActual]);
+
+    // Función que se ejecuta al presionar una tecla en el input
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            let valor = parseInt(inputValue);
+            
+            // Si escribieron texto no válido, restauramos al valor actual
+            if (isNaN(valor)) {
+                setInputValue(paginaActual.toString());
+                return;
+            }
+
+            // Validaciones de límite (Menor a 1 o mayor al total)
+            if (valor < 1) valor = 1;
+            if (valor > totalPaginas) valor = totalPaginas;
+            
+            setInputValue(valor.toString());
+            onPageChange(valor); // Enviamos el valor validado al padre
         }
     };
 
@@ -57,7 +78,7 @@ export default function Pagination({
                     <button
                         onClick={() => onPageChange(Math.max(paginaActual - 1, 1))}
                         disabled={paginaActual === 1}
-                        className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        className="px-4 py-1.5 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed transition shadow-sm"
                     >
                         Anterior
                     </button>
@@ -66,11 +87,10 @@ export default function Pagination({
                     <div className="hidden sm:flex items-center gap-1">
                         <span className="text-sm text-gray-500">Ir a:</span>
                         <input 
-                            type="number" 
-                            min={1} 
-                            max={totalPaginas}
-                            value={paginaActual}
-                            onChange={handleInputPageChange}
+                            type="text" 
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onKeyDown={handleKeyDown}
                             className="w-16 px-2 py-1 text-center text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
@@ -79,7 +99,7 @@ export default function Pagination({
                     <button
                         onClick={() => onPageChange(Math.min(paginaActual + 1, totalPaginas))}
                         disabled={paginaActual === totalPaginas}
-                        className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        className="px-4 py-1.5 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed transition shadow-sm"
                     >
                         Siguiente
                     </button>

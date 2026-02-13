@@ -29,9 +29,38 @@ export default function UserTable() {
     const [idParaEliminar, setIdParaEliminar] = useState<string | null>(null);
 
     // --- ESTADOS PARA PAGINACIÓN ---
-    const [paginaActual, setPaginaActual] = useState(1);
+    //const [paginaActual, setPaginaActual] = useState(1);
+    //const [totalPaginas, setTotalPaginas] = useState(1);
+    //const [porPagina, setPorPagina] = useState(5); // Opcional: para cambiar cuántos ver a la vez
+
+    // --- ESTADOS DE PAGINACIÓN (Con memoria de LocalStorage) ---
+    // Usamos una función inicializadora para leer el localStorage solo la primera vez que carga
+    const [porPagina, setPorPagina] = useState<number>(() => {
+        if (typeof window !== 'undefined') {
+            const guardado = localStorage.getItem('gima_usuarios_per_page');
+            return guardado ? parseInt(guardado) : 15;
+        }
+        return 15;
+    });
+
+    const [paginaActual, setPaginaActual] = useState<number>(() => {
+        if (typeof window !== 'undefined') {
+            const guardado = localStorage.getItem('gima_usuarios_page');
+            return guardado ? parseInt(guardado) : 1;
+        }
+        return 1;
+    });
+
     const [totalPaginas, setTotalPaginas] = useState(1);
-    const [porPagina, setPorPagina] = useState(5); // Opcional: para cambiar cuántos ver a la vez
+
+    // --- GUARDAR EN MEMORIA CADA VEZ QUE CAMBIAN ---
+    useEffect(() => {
+        localStorage.setItem('gima_usuarios_per_page', porPagina.toString());
+    }, [porPagina]);
+
+    useEffect(() => {
+        localStorage.setItem('gima_usuarios_page', paginaActual.toString());
+    }, [paginaActual]);
 
     // --- CARGA DE DATOS ---
     useEffect(() => {
@@ -55,7 +84,7 @@ export default function UserTable() {
         // Si el usuario escribe otra letra antes de los 500ms, limpiamos el temporizador anterior
         return () => clearTimeout(temporizador);
 
-    }, [currentUser, busqueda, paginaActual]); // Se ejecuta si cambia el token, lo que escribes, o la página
+    }, [currentUser, busqueda, paginaActual, porPagina]); // Se ejecuta si cambia el token, lo que escribes, o la página
 
     // --- LÓGICA DE FILTRADO (Memoizada para rendimiento) ---
     const usuariosFiltrados = useMemo(() => {
