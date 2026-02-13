@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { userService } from '@/services/userService';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { getIniciales } from '@/utils/formatters';
+import DeleteAlerta from '@/components/ui/DeleteAlerta';
 
 export default function UserTable() {
     const { user: currentUser } = useAuth();
@@ -21,6 +22,10 @@ export default function UserTable() {
     // --- ESTADOS DE UI (Modales) ---
     const [modalAbierto, setModalAbierto] = useState(false);
     const [usuarioEditando, setUsuarioEditando] = useState<User | null>(null);
+
+    // --- ESTADOS PARA ELIMINACIÓN ---
+    const [alertAbierta, setAlertAbierta] = useState(false);
+    const [idParaEliminar, setIdParaEliminar] = useState<string | null>(null);
 
     // --- CARGA DE DATOS ---
     useEffect(() => {
@@ -46,14 +51,31 @@ export default function UserTable() {
     const abrirModalEditar = (user: User) => { setUsuarioEditando(user); setModalAbierto(true); };
     const cerrarModal = () => { setModalAbierto(false); setUsuarioEditando(null); };
 
-    const eliminarUsuario = async (id: string) => {
-        // Aquí llamarás a userService.delete(id) pronto...
-        setUsers(prev => prev.filter(u => u.id !== id));
+    const solicitarEliminacion = (id: string) => {
+        setIdParaEliminar(id);
+        setAlertAbierta(true);
+    };
 
-    // 4. FUNCIÓN: Eliminar usuario por ID
-    /*const eliminarUsuario = (id: string) => {
-        const nuevosUsuarios = users.filter(user => user.id !== id);
-        setUsers(nuevosUsuarios);*/
+    const confirmarEliminacion = async () => {
+        if (!idParaEliminar || !currentUser?.token) return;
+
+        try {
+            // Llamada al servicio
+            await userService.delete(currentUser.token, idParaEliminar);
+
+            // Actualización optimista de la interfaz
+            setUsers(prev => prev.filter(u => u.id !== idParaEliminar));
+            
+            // Cerramos modal y limpiamos estado
+            cerrarAlert();
+        } catch (error: any) {
+            alert(error.message || "No se pudo eliminar el usuario");
+        }
+    };
+
+    const cerrarAlert = () => {
+        setAlertAbierta(false);
+        setIdParaEliminar(null);
     };
 
     const guardarUsuario = async (userData: any) => {
@@ -172,8 +194,8 @@ export default function UserTable() {
                             <UserRow
                                 key={user.id}
                                 user={user}
-                                onEliminar={eliminarUsuario}
-                                onEditar={abrirModalEditar} // Pasar función de editar
+                                onEliminar={() => solicitarEliminacion(user.id)} 
+                                onEditar={() => abrirModalEditar(user)}
                             />
                         ))}
                         </tbody>
@@ -186,6 +208,14 @@ export default function UserTable() {
                     onClose={cerrarModal}
                     onSave={guardarUsuario}
                     user={usuarioEditando}
+                />
+
+                <DeleteAlerta
+                    isOpen={alertAbierta}
+                    onClose={cerrarAlert}
+                    onConfirm={confirmarEliminacion}
+                    title="¿Eliminar usuario?"
+                    description="Esta acción no se puede deshacer. El usuario perderá acceso al sistema permanentemente."
                 />
             </div>
         </div>

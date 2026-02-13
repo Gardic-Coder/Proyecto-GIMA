@@ -80,5 +80,25 @@ export const userService = {
     }
 
     return await response.json();
+  },
+
+  async delete(token: string, id: string) {
+    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+      method: 'DELETE',
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Accept": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+        // Intentamos leer el error solo si hay contenido
+        const text = await response.text();
+        const message = text ? JSON.parse(text).message : "Error al eliminar usuario";
+        throw new Error(message);
+    }
+    
+    // Retornamos true porque no hay body que devolver (204 No Content)
+    return true; 
   }
 };
