@@ -49,24 +49,16 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Calcular iniciales automáticamente
-        const iniciales = nombre
-            .split(' ')
-            .map(palabra => palabra[0])
-            .join('')
-            .toUpperCase()
-            .substring(0, 2);
-
-        const nuevoUsuario = {
+        // Enviamos el objeto plano. El servicio se encargará de la contraseña y el mapeo.
+        const datosFormulario = {
             nombre,
             email,
-            rol,
+            rol, // Ej: "admin" o "tecnico"
             departamento,
             estado,
-            iniciales,
         };
 
-        onSave(nuevoUsuario);
+        onSave(datosFormulario);
     };
 
     return (

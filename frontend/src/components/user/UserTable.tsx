@@ -8,6 +8,7 @@ import UserModal from './UserModal'; // Agregar esta importación
 import { useAuth } from '@/context/AuthContext';
 import { userService } from '@/services/userService';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { getIniciales } from '@/utils/formatters';
 
 export default function UserTable() {
     const { user: currentUser } = useAuth();
@@ -57,23 +58,38 @@ export default function UserTable() {
 
     // 8. FUNCIÓN: Guardar usuario (AGREGAR)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const guardarUsuario = (userData: any) => {
-        if (usuarioEditando) {
-            // Modo edición: actualizar usuario existente
-            setUsers(users.map(u =>
-                u.id === usuarioEditando.id
-                    ? { ...userData, id: usuarioEditando.id }
-                    : u
-            ));
-        } else {
-            // Modo creación: agregar nuevo usuario
-            const nuevoUsuario: User = {
-                ...userData,
-                id: Date.now().toString(), // ID temporal
-            };
-            setUsers([...users, nuevoUsuario]);
+    const guardarUsuario = async (userData: any) => {
+        try {
+            if (usuarioEditando) {
+                // Lógica de edición (la haremos luego)
+                console.log("Editando...", userData);
+            } else {
+                // LÓGICA DE CREACIÓN REAL
+                if (!currentUser?.token) return;
+                
+                setIsLoading(true); // Mostrar spinner mientras guarda
+                const nuevoUsuarioBackend = await userService.create(currentUser.token, userData);
+            
+                // Adaptamos la respuesta del backend al formato de la lista local
+                const usuarioParaLista: User = {
+                    id: nuevoUsuarioBackend.data.id.toString(),
+                    name: nuevoUsuarioBackend.data.name,
+                    email: nuevoUsuarioBackend.data.email,
+                    iniciales: getIniciales(nuevoUsuarioBackend.data.name),
+                    rol: nuevoUsuarioBackend.data.roles[0] || 'Sin rol',
+                    department: 'N/A',
+                    status: nuevoUsuarioBackend.data.estado,
+                };
+
+                setUsers(prev => [...prev, usuarioParaLista]);
+                alert("Usuario creado exitosamente");
+            }
+            cerrarModal();
+        } catch (error: any) {
+            alert(error.message);
+        } finally {
+            setIsLoading(false);
         }
-        cerrarModal();
     };
 
     if (isLoading) return <LoadingSpinner />;
