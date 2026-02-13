@@ -106,10 +106,10 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
                             value={rol}
                             onChange={(e) => setRol(e.target.value)}
                         >
-                            <option value="Administrador">Administrador</option>
-                            <option value="Técnico">Técnico</option>
-                            <option value="Supervisor">Supervisor</option>
-                            <option value="Desarrollador">Desarrollador</option>
+                            <option value="admin">Administrador</option>
+                            <option value="tecnico">Técnico</option>
+                            <option value="supervisor">Supervisor</option>
+                            <option value="reporter">Reporter</option>
                         </select>
                     </div>
 
@@ -136,8 +136,9 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
                             value={estado}
                             onChange={(e) => setEstado(e.target.value as User['status'])}
                         >
-                            <option value="Activo">Activo</option>
-                            <option value="Inactivo">Inactivo</option>
+                            <option value="activo">Activo</option>
+                            <option value="inactivo">Inactivo</option>
+                            <option value="suspendido">Suspendido</option>
                         </select>
                     </div>
 

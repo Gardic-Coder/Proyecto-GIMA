@@ -7,6 +7,7 @@ import UserRow from './UserRow';
 import UserModal from './UserModal'; // Agregar esta importación
 import { useAuth } from '@/context/AuthContext';
 import { userService } from '@/services/userService';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 export default function UserTable() {
     const { user: currentUser } = useAuth();
@@ -75,7 +76,7 @@ export default function UserTable() {
         cerrarModal();
     };
 
-    if (isLoading) return <div className="text-center p-10">Cargando usuarios...</div>;
+    if (isLoading) return <LoadingSpinner />;
 
     return (
 
