@@ -55,5 +55,30 @@ export const userService = {
     }
 
     return await response.json();
+  },
+
+  async update(token: string, id: string, userData: any) {
+    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+      method: 'PUT',
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify({
+        name: userData.nombre,
+        email: userData.email,
+        estado: userData.estado,
+        roles: [userData.rol.toLowerCase()],
+        // No enviamos password aquí para que Laravel no la actualice a menos que sea necesario
+      }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Error al actualizar usuario");
+    }
+
+    return await response.json();
   }
 };

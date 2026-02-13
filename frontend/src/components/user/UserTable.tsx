@@ -56,15 +56,32 @@ export default function UserTable() {
         setUsers(nuevosUsuarios);*/
     };
 
-    // 8. FUNCIÓN: Guardar usuario (AGREGAR)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const guardarUsuario = async (userData: any) => {
         try {
             if (usuarioEditando) {
-                // Lógica de edición (la haremos luego)
-                console.log("Editando...", userData);
+                // --- MODO EDICIÓN ---
+                const resultado = await userService.update(
+                    currentUser.token, 
+                    usuarioEditando.id, 
+                    userData
+                );
+
+                // Actualizamos el estado local buscando por ID
+                setUsers(prev => prev.map(u => 
+                    u.id === usuarioEditando.id 
+                    ? {
+                        ...u,
+                        name: resultado.data.name,
+                        email: resultado.data.email,
+                        iniciales: getIniciales(resultado.data.name),
+                        rol: resultado.data.roles[0] || 'Sin rol',
+                        status: resultado.data.estado,
+                    }
+                    : u
+                ));
+                alert("Usuario actualizado correctamente");
             } else {
-                // LÓGICA DE CREACIÓN REAL
+                // --- MODO CREACIÓN ---
                 if (!currentUser?.token) return;
                 
                 setIsLoading(true); // Mostrar spinner mientras guarda
