@@ -1,15 +1,26 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User } from '@/types/user';
-import { mockUsers } from '@/utils/mockUsers';
 import UserRow from './UserRow';
 import UserModal from './UserModal'; // Agregar esta importación
+import { useAuth } from '@/context/AuthContext';
+
+const getIniciales = (name: string) => {
+  return name
+    .split(' ')
+    .map(word => word[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+};
 
 export default function UserTable() {
+    const { user: currentUser } = useAuth(); // Obtenemos el token del contexto
+    const [users, setUsers] = useState<User[]>([]); // Empezamos vacío
+    const [isLoading, setIsLoading] = useState(true);
     // 1. ESTADO: Guardar la lista de usuarios
-    const [users, setUsers] = useState<User[]>(mockUsers);
 
     // 2. ESTADO: Guardar el texto de búsqueda
     const [busqueda, setBusqueda] = useState('');
@@ -69,6 +80,46 @@ export default function UserTable() {
         user.email.toLowerCase().includes(busqueda.toLowerCase()) ||
         user.department.toLowerCase().includes(busqueda.toLowerCase())
     );
+
+    useEffect(() => {
+        const cargarUsuarios = async () => {
+            if (!currentUser?.token) return;
+
+            try {
+                const response = await fetch("http://localhost:8000/api/admin/users?page=2&per_page=5", {
+                    headers: {
+                        "Authorization": `Bearer ${currentUser.token}`,
+                        "Accept": "application/json",
+                    },
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+        
+                    // TRANSFORMACIÓN: Adaptamos el formato backend al formato frontend
+                    const usuariosAdaptados: User[] = result.data.map((u: any) => ({
+                        id: u.id.toString(),
+                        iniciales: getIniciales(u.name),
+                        name: u.name,
+                        email: u.email,
+                        rol: u.roles[0] || 'Sin rol', // Tomamos el primer rol del array
+                        department: 'N/A', // Campo pendiente en backend
+                        status: u.estado // Mapeo de estados
+                    }));
+
+                    setUsers(usuariosAdaptados);
+                }
+            } catch (error) {
+                console.error("Error cargando usuarios:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        cargarUsuarios();
+    }, [currentUser]);
+
+    if (isLoading) return <div className="text-center p-10">Cargando usuarios...</div>;
 
     return (
 

@@ -50,7 +50,7 @@ export default function UserRow({ user, onEliminar, onEditar }: UserRowProps) {
             {/* Columna ESTADO */}
             <td className="p-4 text-center">
                 {/*Dependiendo del String brindado, este sera rodeado en verde o rojo*/}
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.status === 'available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.status === 'activo' ? 'bg-green-100 text-green-800' : user.status === 'suspendido' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}>
                     {user.status}
                 </span>
             </td>
