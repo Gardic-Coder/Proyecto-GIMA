@@ -6,8 +6,15 @@ export const userService = {
   /**
    * Obtiene y adapta la lista de usuarios del backend
    */
-  async getAll(token: string, page = 119, perPage = 5) {
-    const response = await fetch(`${API_BASE_URL}/users?page=${page}&per_page=${perPage}`, {
+  async getAll(token: string, page = 1, perPage = 5, search = '') {
+    let url = `${API_BASE_URL}/users?page=${page}&per_page=${perPage}`;
+    
+    if (search) {
+      // encodeURIComponent evita que espacios o caracteres raros rompan la URL
+      url += `&search=${encodeURIComponent(search)}`; 
+    }
+
+    const response = await fetch(url, {
       headers: {
         "Authorization": `Bearer ${token}`,
         "Accept": "application/json",
@@ -18,16 +25,19 @@ export const userService = {
 
     const result = await response.json();
 
-    // Adaptamos el formato aquí mismo para que la vista reciba datos limpios
-    return result.data.map((u: any) => ({
-      id: u.id.toString(),
-      iniciales: getIniciales(u.name),
-      name: u.name,
-      email: u.email,
-      rol: u.roles[0] || 'Sin rol',
-      department: 'N/A', 
-      status: u.estado,
-    }));
+    // Devolvemos tanto los usuarios adaptados como la info de paginación
+    return {
+      usuarios: result.data.map((u: any) => ({
+        id: u.id.toString(),
+        iniciales: getIniciales(u.name),
+        name: u.name,
+        email: u.email,
+        rol: u.roles[0] || 'Sin rol',
+        department: 'N/A', 
+        status: u.estado === 'activo' ? 'available' : 'unavailable',
+      })),
+      meta: result.meta // Pasamos el meta para usarlo en el paginador del frontend
+    };
   },
 
   async create(token: string, userData: any) {

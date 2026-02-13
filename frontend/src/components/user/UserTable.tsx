@@ -27,15 +27,33 @@ export default function UserTable() {
     const [alertAbierta, setAlertAbierta] = useState(false);
     const [idParaEliminar, setIdParaEliminar] = useState<string | null>(null);
 
+    // --- ESTADOS PARA PAGINACIÓN ---
+    const [paginaActual, setPaginaActual] = useState(1);
+    const [totalPaginas, setTotalPaginas] = useState(1);
+
     // --- CARGA DE DATOS ---
     useEffect(() => {
         if (!currentUser?.token) return;
 
-        userService.getAll(currentUser.token)
-            .then(setUsers)
-            .catch(err => console.error(err))
-            .finally(() => setIsLoading(false));
-    }, [currentUser]);
+        // Configuramos un temporizador (Debounce)
+        const temporizador = setTimeout(() => {
+            setIsLoading(true);
+            
+            // Llamamos al backend enviando la página y la búsqueda actual
+            userService.getAll(currentUser.token, paginaActual, 5, busqueda)
+                .then((resultado) => {
+                    setUsers(resultado.usuarios);
+                    setTotalPaginas(resultado.meta.last_page); // Guardamos cuantas páginas hay en total
+                })
+                .catch(err => console.error(err))
+                .finally(() => setIsLoading(false));
+
+        }, 500); // 500 milisegundos de espera
+
+        // Si el usuario escribe otra letra antes de los 500ms, limpiamos el temporizador anterior
+        return () => clearTimeout(temporizador);
+
+    }, [currentUser, busqueda, paginaActual]); // Se ejecuta si cambia el token, lo que escribes, o la página
 
     // --- LÓGICA DE FILTRADO (Memoizada para rendimiento) ---
     const usuariosFiltrados = useMemo(() => {
@@ -190,14 +208,22 @@ export default function UserTable() {
                         </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                        {usuariosFiltrados.map(user => (
-                            <UserRow
-                                key={user.id}
-                                user={user}
-                                onEliminar={() => solicitarEliminacion(user.id)} 
-                                onEditar={() => abrirModalEditar(user)}
-                            />
-                        ))}
+                        {users.length > 0 ? (
+                            users.map(user => (
+                                <UserRow
+                                    key={user.id}
+                                    user={user}
+                                    onEliminar={() => solicitarEliminacion(user.id)}
+                                    onEditar={() => abrirModalEditar(user)}
+                                />
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan={5} className="text-center py-8 text-gray-500">
+                                    No se encontraron usuarios para "{busqueda}"
+                                </td>
+                            </tr>
+                        )}
                         </tbody>
                     </table>
                 </div>

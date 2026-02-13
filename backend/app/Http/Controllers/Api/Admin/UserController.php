@@ -43,14 +43,23 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. Capturar el valor de la query o usar 15 por defecto
-        // 2. Usar clamp o min/max para asegurar el rango de 5 a 30
-        $perPage = $request->query('per_page', 15);
-        $perPage = max(5, min(30, (int) $perPage));
-        // 3. Aplicar el valor dinámico a la paginación
-        return UserResource::collection(
-            User::with('roles')->paginate($perPage)
-        );
+        // 1. Capturamos los parámetros
+        $perPage = max(5, min(30, (int) $request->query('per_page', 15)));
+        $search = $request->query('search');
+
+        // 2. Preparamos la consulta base
+        $query = User::with('roles');
+
+        // 3. Si hay una búsqueda, aplicamos el filtro en la base de datos
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'ilike', "%{$search}%")
+                    ->orWhere('email', 'ilike', "%{$search}%");
+            });
+        }
+
+        // 4. Paginamos el resultado filtrado
+        return UserResource::collection($query->paginate($perPage));
     }
 
     /**
