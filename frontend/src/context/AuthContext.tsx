@@ -40,7 +40,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push("/dashboard");
   };
 
-  const logout = () => {
+  const logout = async () => {
+    const token = localStorage.getItem("token");
+
+    // 1. Intentamos invalidar el token en el backend primero
+    if (token) {
+        try {
+            await fetch("http://localhost:8000/api/autenticacion/cerrar-sesion", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Accept": "application/json",
+                    // No necesitamos body para esta petición
+                },
+            });
+        } catch (error) {
+            console.error("Error al invalidar el token en el servidor:", error);
+            // No bloqueamos el flujo. Si falla la red, igual queremos limpiar el frontend.
+        }
+    }
+
+    // 2. Limpieza garantizada del frontend (pase lo que pase arriba)
     setUser(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
