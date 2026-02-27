@@ -24,7 +24,7 @@ export default function LoginPage() {
     }
   }, [user, router]);
 
-  const handleLogin = async (e: React.FormEvent) => {
+ const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -41,8 +41,23 @@ export default function LoginPage() {
       const result = await response.json();
 
       if (response.ok && result.estado === "exito") {
-        // Usamos la función del contexto que ya guarda en localStorage y redirige
-        login(result.data); 
+        
+        // --- SOLUCIÓN: MAPEO EXACTO DEL LOGIN DE LARAVEL ---
+        // Basado en AuthController.php línea 70: el objeto entero viene dentro de 'data'
+        // y los roles se llaman simplemente 'roles'
+        const usuarioCompleto = {
+          // Extraemos el nombre ('usuario' lo mapeamos a 'name' para consistencia)
+          name: result.data.usuario || "Usuario", 
+          // Extraemos los roles
+          roles_asignados: result.data.roles || [], 
+          // Extraemos el token
+          token: result.data.token || "token_temporal",
+          // Guardamos el objeto original crudo por si acaso
+          data: result.data 
+        };
+
+        login(usuarioCompleto); 
+
       } else {
         alert(result.mensaje || "Error al iniciar sesión");
       }
@@ -53,7 +68,6 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false);
     }
-
   };
 
   return (

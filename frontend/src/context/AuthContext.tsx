@@ -3,8 +3,10 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { useRouter } from 'next/navigation';
 
 interface User {
-  usuario: string;
-  roles: string[];
+  id?: number;
+  name: string;
+  email?: string;
+  roles_asignados: string[];
   token: string;
 }
 
