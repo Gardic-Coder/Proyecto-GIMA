@@ -5,28 +5,53 @@ import { useAuth } from '@/context/AuthContext';
 
 interface AuthGuardProps {
     children: React.ReactNode;
-    roleRequired?: string;
+    // MEJORA: Ahora acepta un texto ("admin") o un arreglo (["admin", "supervisor"])
+    roleRequired?: string | string[];
 }
 
 export default function AuthGuard({ children, roleRequired }: AuthGuardProps) {
     const { user, isLoading } = useAuth();
     const router = useRouter();
 
+    // 1. ESCÁNER UNIVERSAL DE ROLES
+    let rawRoles: any[] = [];
+    if (Array.isArray(user?.roles_asignados)) rawRoles = user.roles_asignados;
+    else if (Array.isArray(user?.roles)) rawRoles = user.roles;
+    else if (Array.isArray(user?.data?.roles)) rawRoles = user.data.roles;
+
+    const userRoles = rawRoles
+        .map((rol: any) => {
+            if (typeof rol === 'string') return rol;
+            if (rol && typeof rol === 'object' && rol.name) return rol.name;
+            return "";
+        })
+        .filter((rol: string) => rol.trim() !== "")
+        .map((rol: string) => rol.toLowerCase());
+
+    // 2. LÓGICA DE AUTORIZACIÓN FLEXIBLE
+    const checkPermission = () => {
+        if (!roleRequired) return true; // Si no pide rol, pasa directo
+        
+        // Convertimos a arreglo por si mandaron un string simple
+        const requiredRoles = Array.isArray(roleRequired) ? roleRequired : [roleRequired];
+        const normalizedRequired = requiredRoles.map(r => r.toLowerCase());
+        
+        // Verificamos si el usuario tiene al menos uno de los roles requeridos
+        return normalizedRequired.some(r => userRoles.includes(r));
+    };
+
+    const hasPermission = checkPermission();
+
     useEffect(() => {
-        // Solo actuamos cuando el contexto ha terminado de cargar la sesión del localStorage
         if (!isLoading) {
             if (!user) {
-                // Si no hay usuario en el contexto, al login
                 router.push("/auth/login");
-            } else if (roleRequired && !user.roles?.includes(roleRequired)) {
-                // Si hay usuario pero no tiene el rol necesario
-                router.push("/unauthorized");
+            } else if (roleRequired && !hasPermission) {
+                router.push("/unauthorized"); // Redirige si no tiene permiso
             }
         }
-    }, [user, isLoading, roleRequired, router]);
+    }, [user, isLoading, roleRequired, hasPermission, router]);
 
-    // Mientras el contexto verifica la sesión, mostramos un estado de carga
-    // Esto evita que se vea contenido protegido por un milisegundo
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -35,16 +60,9 @@ export default function AuthGuard({ children, roleRequired }: AuthGuardProps) {
         );
     }
 
-    // Si no hay usuario y no está cargando, no renderizamos nada (el useEffect redirigirá)
-    if (!user) {
+    if (!user || (roleRequired && !hasPermission)) {
         return null;
     }
 
-    // Si el rol es requerido y no lo cumple, tampoco renderizamos los hijos
-    if (roleRequired && !user.roles?.includes(roleRequired)) {
-        return null;
-    }
-
-    // Si todo está bien, mostramos el contenido protegido
     return <>{children}</>;
 }
