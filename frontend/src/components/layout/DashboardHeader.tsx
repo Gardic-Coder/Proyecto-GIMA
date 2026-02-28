@@ -13,7 +13,7 @@ export function DashboardHeader({ subtitle }: DashboardHeaderProps) {
   const pathname = usePathname()
   // 2. Extraemos el usuario de la sesión actual
   const { user } = useAuth() 
-  console.log("Datos del usuario en Header:", user);
+  
 
   const pathParts = pathname.split("/").filter((part) => part)
   const lastPart = pathParts.length > 0 ? pathParts[pathParts.length - 1] : "Dashboard"

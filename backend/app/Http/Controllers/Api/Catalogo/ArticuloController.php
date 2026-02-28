@@ -9,12 +9,33 @@ use App\Http\Resources\ArticuloResource;
 
 class ArticuloController extends Controller
 {
+    
     /**
      * GET /api/catalogo/articulos
      */
-    public function index()
+    public function index(Request $request)
     {
-        $articulos = Articulo::withCount('activos')->paginate(15);
+        $query = Articulo::withCount('activos');
+
+        // 1. Filtro de Búsqueda global (el que ya hicimos)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('marca', 'LIKE', "%{$search}%")
+                  ->orWhere('modelo', 'LIKE', "%{$search}%")
+                  ->orWhere('tipo', 'LIKE', "%{$search}%")
+                  ->orWhere('descripcion', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // 2. NUEVO: Filtro específico por Tipo
+        if ($request->filled('tipo')) {
+            $query->where('tipo', $request->tipo);
+        }
+
+        $perPage = $request->input('per_page', 15);
+        $articulos = $query->paginate($perPage);
+
         return ArticuloResource::collection($articulos);
     }
 
