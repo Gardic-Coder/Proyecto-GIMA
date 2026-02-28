@@ -3,8 +3,8 @@ import { getIniciales } from '@/utils/formatters';
 const API_BASE_URL = "http://localhost:8000/api/admin";
 
 export const userService = {
-  /**
-   * Obtiene y adapta la lista de usuarios del backend
+  
+  /** * Obtiene y adapta la lista de usuarios del backend
    */
   async getAll(token: string, page = 1, perPage = 5, search = '') {
     let url = `${API_BASE_URL}/users?page=${page}&per_page=${perPage}`;
