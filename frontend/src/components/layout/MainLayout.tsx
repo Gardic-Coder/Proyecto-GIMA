@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header"; 
-import { SidebarProvider } from "@/components/ui/sidebarContext";
+import  SidebarProvider  from "@/components/ui/sidebarContext";
 import AuthGuard from "@/components/AuthGuard"; 
 import type React from "react";
 

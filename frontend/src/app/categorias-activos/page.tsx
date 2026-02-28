@@ -14,7 +14,7 @@ import {
 import DeleteAlert from "@/components/ui/DeleteAlerta";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
 import Link from "next/link";
-
+//import TablaInventario from "@/components/configuracion/TablaInventario";
 import { useAuth } from "@/context/AuthContext";
 import { articuloService } from "@/services/activeService"; 
 import Pagination from "@/components/ui/Paginacion"; 
@@ -25,6 +25,7 @@ export default function CategoriesPage() {
   // Estados de datos
   const [categories, setCategories] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshTrigger, setRefreshTrigger] = useState(0); 
   
@@ -136,22 +137,22 @@ export default function CategoriesPage() {
 
   return (
     <div className="font-sans space-y-6">
-      <DashboardHeader subtitle="Gestión de activos disponibles" />
-      
+      <DashboardHeader
+        title="Gestión de activos"
+        subtitle="Gestión de inventario de activos" />
+
+      {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-4 pb-2">
         <div>
           <h1 className="text-3xl font-bold text-gima-navy font-title tracking-wide">
-            CATEGORÍAS
+            INVENTARIO DE ACTIVOS
           </h1>
-          <p className="text-gima-gray text-sm mt-1 font-medium">
-            Clasificación de equipos
-          </p>
-          <Link href="/configuracion">
-            <button className="flex items-center gap-2 text-gray-500 mt-5 hover:text-[#0d2344] transition-colors">
-              <div className="bg-white p-1 rounded-md shadow-sm">
+          <Link href="/dashboard">
+            <button className="flex items-center gap-2 text-gray-500 mt-5 hover:text-[#0d2344] transition-colors group">
+              <div className="bg-white p-1 rounded-md shadow-sm group-hover:bg-slate-100">
                 <ChevronLeft size={16} />
               </div>
-              <span className="text-sm font-medium">Volver a configuración</span>
+              <span className="text-sm font-medium">Volver al inicio</span>
             </button>
           </Link>
         </div>
@@ -170,7 +171,7 @@ export default function CategoriesPage() {
             className="bg-gima-blue hover:brightness-90 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-500/30 transition-all flex items-center gap-2 transform active:scale-95"
           >
             <Plus size={20} strokeWidth={3} />
-            <span>NUEVA CATEGORÍA</span>
+            <span>AGREGAR ACTIVOS</span>
           </button>
         </div>
       </div>
@@ -391,8 +392,8 @@ export default function CategoriesPage() {
         isOpen={isAlertOpen}
         onClose={() => setIsAlertOpen(false)}
         onConfirm={confirmDelete}
-        title="¿Eliminar Categoría?"
-        description="Esta acción no se puede deshacer."
+        title="¿Eliminar Activo?"
+        description="Esta acción no se puede deshacer y el equipo será borrado del sistema."
       />
     </div>
   );

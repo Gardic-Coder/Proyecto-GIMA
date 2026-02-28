@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { DashboardHeader } from "@/components/layout/DashboardHeader"
-import { StatCard } from "@/components/dashboard/StatCard"
 import { ChartPlaceholder } from "@/components/ui/ChartPlaceholder"
 import AuthGuard from "@/components/AuthGuard"
 
@@ -57,28 +56,11 @@ export default function DashboardPage() {
         {/* Aquí le quitamos el texto fijo para que muestre el usuario real */}
         <DashboardHeader />
 
-        <div className="p-8 space-y-8">
-          {/* Stats Grid: Ahora conectados a los estados dinámicos */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <StatCard 
-              title="Total activos" 
-              value={isLoading ? "..." : stats.totalActivos} 
-              trend={12} 
-              trendLabel="este mes" 
-            />
-            <StatCard 
-              title="En mantenimiento" 
-              value={isLoading ? "..." : stats.enMantenimiento} 
-            />
-            <StatCard 
-              title="Presupuesto ejecutado" 
-              value={isLoading ? "..." : `${stats.presupuesto}$`} 
-              highlighted={true} 
-            />
-          </div>
-
-          {/* Chart */}
-          <ChartPlaceholder title="Disponibilidad de activos" period="Últimos 6 meses" />
+      <div className="p-8 space-y-8">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          
+        </div>
         </div>
       </div>
     </AuthGuard>

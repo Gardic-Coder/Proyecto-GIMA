@@ -101,8 +101,22 @@ export function Sidebar() {
       )}
     >
       <div className="flex items-center justify-between p-4 mb-4">
-        <div className={cn("relative h-10 transition-all duration-300 overflow-hidden", isOpen ? "w-32 opacity-100" : "w-0 opacity-0")}>
-          <Image src="/logo-gima.png" alt="GIMA Logo" fill className="object-contain object-left" priority sizes="(max-width: 768px) 100vw, 33vw" />
+        <div
+          className={cn(
+            "relative h-10 transition-all duration-300 overflow-hidden",
+            isOpen ? "w-32 opacity-100" : "w-0 opacity-0"
+          )}
+        >
+          {/* Usamos object-contain y fill para mejor adaptación */}
+          <Link href="/" className="absolute inset-0">
+            <Image
+              src="/logo-gima.png"
+              alt="GIMA Logo"
+              fill
+              className="object-contain object-left"
+              priority
+            />
+          </Link> 
         </div>
         <button onClick={() => setIsOpen(!isOpen)} className="p-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white">
           <Menu size={24} />

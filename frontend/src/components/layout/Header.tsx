@@ -1,10 +1,14 @@
 "use client"; 
 
-import { Search, Bell, Menu } from 'lucide-react';
-import { useSidebar } from '@/components/ui/sidebarContext'; 
+//import { useSidebar } from '@/components/ui/sidebarContext'; 
+import { useContext } from 'react';
+import { Search, Bell, CircleUser, Menu } from 'lucide-react';
+import { sidebarContext } from '../ui/sidebarContext';
+
 
 export default function Header() {
-  const { toggle } = useSidebar(); 
+  
+  const { toggleSidebar } = useContext(sidebarContext); 
 
   // Ya no necesitamos el useAuth ni la lógica de roles aquí, 
   // porque el componente interno de la página se encarga de eso.
@@ -15,8 +19,8 @@ export default function Header() {
       {/* Izquierda: Botón Menú Móvil y Título */}
       <div className="flex items-center gap-4">
         <button 
-          onClick={toggle}
-          className="p-2 md:hidden hover:bg-gray-100 rounded-lg transition-colors text-blue-900"
+          onClick={toggleSidebar} 
+          className="p-2 md:hidden hover:bg-gray-100 rounded-lg transition-colors text-primary"
         >
           <Menu size={24} />
         </button>
