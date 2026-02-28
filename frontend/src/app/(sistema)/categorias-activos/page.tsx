@@ -137,9 +137,9 @@ export default function CategoriesPage() {
 
   return (
     <div className="font-sans space-y-6">
-      <DashboardHeader
+      {/*<DashboardHeader
         title="Gestión de activos"
-        subtitle="Gestión de inventario de activos" />
+        subtitle="Gestión de inventario de activos" />*/}
 
       {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-4 pb-2">

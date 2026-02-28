@@ -5,11 +5,13 @@ import { ChartPlaceholder } from "@/components/ui/ChartPlaceholder"
 import { UpcomingTasks } from "@/components/dashboard/UpcomingTasks";
 import { AssetStatus } from "@/components/dashboard/AssetStatus";
 import { StatCard } from "@/components/dashboard/StatCard";
+import AuthGuard from "@/components/AuthGuard"
 
 export default function DashboardPage() {
   return (
+    <AuthGuard>
     <div className="min-h-screen">
-      <DashboardHeader subtitle="Bienvenido al panel GIMA" />
+      {/*<DashboardHeader subtitle="Bienvenido al panel GIMA" />*/}
 
       <div className="p-8 space-y-8">
         {/* Stats Grid */}
@@ -26,5 +28,6 @@ export default function DashboardPage() {
         <AssetStatus />
       </div>
     </div>
+    </AuthGuard>
   )
 }
