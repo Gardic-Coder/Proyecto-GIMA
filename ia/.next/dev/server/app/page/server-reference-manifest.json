@@ -1,0 +1,65 @@
+{
+  "node": {
+    "60358cb9e7b9d153e86117f8650f0068172529c56a": {
+      "workers": {
+        "app/page": {
+          "moduleId": "[project]/.next-internal/server/app/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/actions/voice.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/app/actions/vision.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE2 => \"[project]/app/actions/files.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "executeVoiceCommand",
+          "filename": "app/actions/voice.ts"
+        }
+      },
+      "layer": {
+        "app/page": "action-browser"
+      },
+      "exportedName": "executeVoiceCommand",
+      "filename": "app/actions/voice.ts"
+    },
+    "608e7147603718d1755f1a28d70be92239ce98a38f": {
+      "workers": {
+        "app/page": {
+          "moduleId": "[project]/.next-internal/server/app/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/actions/voice.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/app/actions/vision.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE2 => \"[project]/app/actions/files.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "transcribeAudio",
+          "filename": "app/actions/voice.ts"
+        }
+      },
+      "layer": {
+        "app/page": "action-browser"
+      },
+      "exportedName": "transcribeAudio",
+      "filename": "app/actions/voice.ts"
+    },
+    "40d1e550a16274605ad04a6e223d9367674e356e45": {
+      "workers": {
+        "app/page": {
+          "moduleId": "[project]/.next-internal/server/app/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/actions/voice.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/app/actions/vision.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE2 => \"[project]/app/actions/files.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "analyzePartImage",
+          "filename": "app/actions/vision.ts"
+        }
+      },
+      "layer": {
+        "app/page": "action-browser"
+      },
+      "exportedName": "analyzePartImage",
+      "filename": "app/actions/vision.ts"
+    },
+    "4028b0a9c3ec433b9088771264083832b52f1377c2": {
+      "workers": {
+        "app/page": {
+          "moduleId": "[project]/.next-internal/server/app/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/actions/voice.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/app/actions/vision.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE2 => \"[project]/app/actions/files.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "analyzePdf",
+          "filename": "app/actions/files.ts"
+        }
+      },
+      "layer": {
+        "app/page": "action-browser"
+      },
+      "exportedName": "analyzePdf",
+      "filename": "app/actions/files.ts"
+    }
+  },
+  "edge": {}
+}

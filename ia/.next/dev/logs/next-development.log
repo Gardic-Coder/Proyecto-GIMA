@@ -1,0 +1,17 @@
+[00:00:03.153] Server  ERROR   (node:40) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[00:00:03.176] Server  LOG      ✓ Ready in 2.7s
+[00:00:06.227] Server  LOG      ○ Compiling / ...
+[00:00:29.656] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:30.370] Browser WARN    Image with src "http://localhost:3001/logotype.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:00:37.240] Server  INFO    {
+  "timestamp": "2026-03-04T05:31:11.814Z",
+  "level": "info",
+  "message": "No hay token de sesión, intentando login automático (Silent Login).",
+  "component": "ChatAPIRoute"
+}
+[00:00:37.241] Server  LOG     [Auth] Intentando login en: http://app:8000/api/autenticacion/iniciar-sesion
+[00:00:38.326] Server  LOG     [Auth] Login exitoso, token guardado en cookie.
+[00:00:38.983] Server  ERROR   {}
+[00:11:36.419] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:11:36.960] Browser WARN    Image with src "http://localhost:3001/logotype.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
