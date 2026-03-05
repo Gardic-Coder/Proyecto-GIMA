@@ -39,3 +39,5 @@ frontend/yarn-error.log*
 .idea/
 *.swp
 *.bak
+
+.next
