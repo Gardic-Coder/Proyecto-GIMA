@@ -1,3 +1,0 @@
-[00:00:03.091] Server  ERROR   (node:40) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
-(Use `node --trace-warnings ...` to show where the warning was created)
-[00:00:03.104] Server  LOG      ✓ Ready in 2.5s
