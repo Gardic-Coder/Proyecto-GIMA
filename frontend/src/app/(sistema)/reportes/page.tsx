@@ -1,5 +1,6 @@
 "use client"
 
+import AuthGuard from "@/components/AuthGuard";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
 import { ReportStatCard } from "@/components/reportes/ReportStatCard";
 import { ReportTable } from "@/components/reportes/ReportTable";
@@ -8,6 +9,7 @@ import Link from "next/link";
 
 export default function ReportesPage() {
   return (
+     <AuthGuard roleRequired={["admin", "supervisor", "reporter"]}>
     <div className="min-h-screen bg-gray-50/50 p-8 space-y-8">
       <DashboardHeader subtitle="Reportes de mantenimientos" />
 
@@ -33,5 +35,6 @@ export default function ReportesPage() {
       {/* Tabla de Mantenimientos */}
       <ReportTable />
     </div>
+    </AuthGuard>
   );
 }

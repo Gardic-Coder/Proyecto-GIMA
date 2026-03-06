@@ -11,6 +11,7 @@ import {
   Search,
   Globe, // Changed to Globe as MapPin is not available in the context
 } from "lucide-react";
+import AuthGuard from "@/components/AuthGuard";
 
 interface ConfigCardProps {
   title: string;
@@ -45,6 +46,7 @@ const ConfigCard: React.FC<ConfigCardProps> = ({ title, desc, icon, href }) => {
 
 export default function ConfiguracionPage() {
   return (
+    <AuthGuard roleRequired={["admin"]}>
     <section className="p-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
@@ -109,5 +111,6 @@ export default function ConfiguracionPage() {
         />
       </section>
     </section>
+    </AuthGuard>
   );
 }
