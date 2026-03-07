@@ -11,7 +11,7 @@ export const api = axios.create({
 // Interceptor: Se ejecuta ANTES de cada petición para inyectar el Token
 api.interceptors.request.use((config) => {
   // Verificamos que estamos en el navegador para poder usar localStorage
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token_gima') : null;
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
 
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;

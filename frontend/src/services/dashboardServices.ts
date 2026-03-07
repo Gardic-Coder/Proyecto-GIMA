@@ -30,15 +30,15 @@ export interface TareaProxima {
 // --- SERVICIO ---
 export const dashboardService = {
   getEstadisticas: async (): Promise<EstadisticasGenerales> => {
-    const response = await api.get('/dashboard/main/estadisticas');
+    const response = await api.get('dashboard/main/estadisticas');
     return response.data;
   },
   getActivosEstado: async (): Promise<BarraActivos> => {
-    const response = await api.get('/dashboard/main/activos-estado');
+    const response = await api.get('dashboard/main/activos-estado');
     return response.data;
   },
   getAgenda: async (): Promise<TareaProxima[]> => {
-    const response = await api.get('/dashboard/main/agenda');
+    const response = await api.get('dashboard/main/agenda');
     return response.data;
   }
 };
