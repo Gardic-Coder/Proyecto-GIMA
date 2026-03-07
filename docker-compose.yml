@@ -5,6 +5,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./backend:/var/www/html # Sincroniza tu carpeta local con el contenedor
+      - /var/www/html/vendor # Evita que los archivos locales sobrescriban las dependencias del contenedor
     ports:
       - "${PORT_BACKEND}:8000"
     depends_on:
