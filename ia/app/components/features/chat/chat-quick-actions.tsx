@@ -15,7 +15,7 @@
 'use client';
 
 import {
-    Package, ClipboardList, AlertTriangle, Wrench, FileText, PlusCircle,
+    Package, ClipboardList, AlertTriangle, Wrench, FileText,
     Sparkles, Send, X,
 } from 'lucide-react';
 import { type ReactNode, useState, useRef, useEffect, useCallback } from 'react';
@@ -102,7 +102,7 @@ export const QUICK_ACTIONS: QuickAction[] = [
         promptBuilder: (data) =>
             `Necesito resumir estas notas de actividad:\n\n${String(data.activityNotes).trim()}`,
     },
-    {
+    /* {
         icon: <PlusCircle className="size-3.5" />,
         label: 'Crear Orden',
         prompt: 'Crear una orden de trabajo para ',
@@ -140,7 +140,7 @@ export const QUICK_ACTIONS: QuickAction[] = [
         ],
         promptBuilder: (data) =>
             `Crear una orden de trabajo para ${String(data.equipment).trim()} con prioridad ${data.priority}. Descripción: ${String(data.description).trim()}`,
-    },
+    }, */
 ];
 
 // ===========================================
