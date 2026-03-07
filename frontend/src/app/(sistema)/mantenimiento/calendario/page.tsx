@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
 import { ChevronLeft, ChevronRight, CalendarClock } from "lucide-react";
+import AuthGuard from "@/components/AuthGuard";
 
 function buildMonth(year: number, month: number) {
   // month: 0-11
@@ -49,6 +50,9 @@ export default function CalendarioMantenimientoPage() {
   const WEEK = ["LUN","MAR","MIE","JUE","VIE","SAB","DOM"];
 
   return (
+
+    <AuthGuard roleRequired={["admin", "supervisor", "tecnico"]}>
+
     <div className="min-h-screen">
       <DashboardHeader subtitle="" />
 
@@ -168,5 +172,6 @@ export default function CalendarioMantenimientoPage() {
         </div>
       </div>
     </div>
+    </AuthGuard>
   );
 }

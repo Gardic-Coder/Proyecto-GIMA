@@ -11,7 +11,7 @@ import {
   Save
 } from "lucide-react";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
-
+import AuthGuard from "@/components/AuthGuard";
 type Estado = "operativo" | "mantenimiento" | "revision";
 
 function ModificacionFormulario() {
@@ -87,6 +87,7 @@ function ModificacionFormulario() {
   };
 
   return (
+    <AuthGuard roleRequired={["admin", "supervisor"]}>
     <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 p-8 md:p-10">
       
       <div className="mb-10 border-b border-slate-100 pb-6 flex justify-between items-end">
@@ -203,6 +204,7 @@ function ModificacionFormulario() {
         </div>
       </form>
     </div>
+    </AuthGuard>
   );
 }
 
@@ -222,5 +224,6 @@ export default function ModificacionActivoPage() {
         <ModificacionFormulario />
       </Suspense>
     </div>
+    
   );
 }

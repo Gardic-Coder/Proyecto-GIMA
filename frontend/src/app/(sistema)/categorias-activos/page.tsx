@@ -1,5 +1,5 @@
 "use client";
-
+import AuthGuard from "@/components/AuthGuard";
 import { useState, useEffect } from "react";
 import {
   Pencil,
@@ -136,6 +136,8 @@ export default function CategoriesPage() {
   };
 
   return (
+    <AuthGuard roleRequired={["admin", "supervisor"]}>
+    
     <div className="font-sans space-y-6">
       {/*<DashboardHeader
         title="Gestión de activos"
@@ -396,5 +398,6 @@ export default function CategoriesPage() {
         description="Esta acción no se puede deshacer y el equipo será borrado del sistema."
       />
     </div>
+    </AuthGuard>
   );
 }
