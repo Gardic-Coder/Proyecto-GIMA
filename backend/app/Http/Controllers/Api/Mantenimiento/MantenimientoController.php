@@ -18,12 +18,14 @@ class MantenimientoController extends Controller
      */
     public function index(Request $request)
         {
+            $limite = $request->input('limite', 5); 
+
             $mantenimientos = Mantenimiento::with(['activo', 'tecnicoPrincipal']) // Ajusta tus relaciones
                 ->when($request->search, fn($q, $v) => $q->search($v))
                 ->when($request->sede_id, fn($q, $v) => $q->porSede($v))
                 ->when($request->solo_activos, fn($q) => $q->activos())
                 ->when($request->tecnico_id, fn($q, $v) => $q->where('tecnico_principal_id', $v))
-                ->paginate(15);
+                ->paginate(5);
 
             return response()->json($mantenimientos);
         }
