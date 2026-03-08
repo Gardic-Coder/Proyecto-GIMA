@@ -7,6 +7,7 @@ import { mockTecnicos, mockOrdenes } from "@/utils/mockMantenimiento"
 import { Orden as OrdenBase, OrdenEstado, TipoMantenimiento, Prioridad } from '@/types/mantenimiento'
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import AuthGuard from "@/components/AuthGuard"
 
 // Interface extendida para campos personalizados
 interface Orden extends OrdenBase {
@@ -148,6 +149,9 @@ export default function Mantenimiento() {
   const tecnicos = mockTecnicos.filter(user => user.rol?.toLowerCase() === 'tecnico');
 
   return (
+
+    <AuthGuard roleRequired={["admin", "supervisor", "tecnico"]}>
+
     <div className="min-h-screen p-6 bg-gray-50/50 text-gray-800 font-sans">
       {/* HEADER */}
       <div className="flex justify-between items-center mb-6">
@@ -477,6 +481,7 @@ export default function Mantenimiento() {
         </button>
       </div>
     </div>
+    </AuthGuard>
   )
 }
 
@@ -490,4 +495,5 @@ function StatCard({ icon, label, value, color }: { icon: any, label: string, val
       </div>
     </div>
   )
+  
 }

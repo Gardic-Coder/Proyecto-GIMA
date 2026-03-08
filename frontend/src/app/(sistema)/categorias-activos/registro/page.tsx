@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { DashboardHeader } from "@/components/layout/DashboardHeader"; 
+import AuthGuard from "@/components/AuthGuard";
 
 export default function NuevoActivoPage() {
   const [formData, setFormData] = useState({
@@ -59,6 +60,7 @@ export default function NuevoActivoPage() {
   };
 
   return (
+    <AuthGuard roleRequired={["admin", "supervisor"]}>
     <div className="font-sans space-y-6">
       
       {/* HEADER */}
@@ -224,5 +226,6 @@ export default function NuevoActivoPage() {
         </form>
       </div>
     </div>
+    </AuthGuard>
   );
 }
