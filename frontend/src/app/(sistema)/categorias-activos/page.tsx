@@ -9,12 +9,12 @@ import {
   Filter,
   ChevronLeft,
   X,
-  Loader2
+  Loader2,
+  Package // Icono añadido para el diseño móvil
 } from "lucide-react";
 import DeleteAlert from "@/components/ui/DeleteAlerta";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
 import Link from "next/link";
-//import TablaInventario from "@/components/configuracion/TablaInventario";
 import { useAuth } from "@/context/AuthContext";
 import { articuloService } from "@/services/activeService"; 
 import Pagination from "@/components/ui/Paginacion"; 
@@ -32,7 +32,9 @@ export default function CategoriesPage() {
   // --- NUEVOS ESTADOS PARA EL FILTRO ---
   const [filterTipo, setFilterTipo] = useState(""); 
   const [showFilters, setShowFilters] = useState(false); 
-  
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isTipoDropdownOpen, setIsTipoDropdownOpen] = useState(false);
+
   // Estados de Paginación
   const [paginaActual, setPaginaActual] = useState(1);
   const [porPagina, setPorPagina] = useState(5);
@@ -139,12 +141,8 @@ export default function CategoriesPage() {
     <AuthGuard roleRequired={["admin", "supervisor"]}>
     
     <div className="font-sans space-y-6">
-      {/*<DashboardHeader
-        title="Gestión de activos"
-        subtitle="Gestión de inventario de activos" />*/}
-
       {/* HEADER */}
-      <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-4 pb-2">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-2">
         <div>
           <h1 className="text-3xl font-bold text-gima-navy font-title tracking-wide">
             INVENTARIO DE ACTIVOS
@@ -159,18 +157,18 @@ export default function CategoriesPage() {
           </Link>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-3 w-full md:w-auto">
           {/* --- BOTÓN DE FILTRO DINÁMICO --- */}
           <button 
             onClick={() => setShowFilters(!showFilters)}
-            className={`p-3 border rounded-xl hover:bg-slate-50 transition-colors shadow-sm ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-gima-gray'}`}
+            className={`p-3 border rounded-xl hover:bg-slate-50 transition-colors shadow-sm shrink-0 ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-gima-gray'}`}
           >
             <Filter size={20} />
           </button>
 
           <button 
             onClick={handleCreateClick}
-            className="bg-gima-blue hover:brightness-90 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-500/30 transition-all flex items-center gap-2 transform active:scale-95"
+            className="w-full md:w-auto bg-gima-blue hover:brightness-90 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-500/30 transition-all flex items-center justify-center gap-2 transform active:scale-95"
           >
             <Plus size={20} strokeWidth={3} />
             <span>AGREGAR ACTIVOS</span>
@@ -179,47 +177,91 @@ export default function CategoriesPage() {
       </div>
 
       <section className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
-        {/* --- NUEVA BARRA DE HERRAMIENTAS CON MENÚ DESPLEGABLE --- */}
-        <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white">
+        {/* --- BARRA DE HERRAMIENTAS CON MENÚ DESPLEGABLE --- */}
+        <div className="p-4 md:p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white">
           <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
             {/* Buscador */}
             <div className="relative w-full md:w-72">
               <Search className="absolute left-4 top-3 text-slate-400" size={18} />
               <input
                 type="text"
-                placeholder="Buscar categoría..."
+                placeholder="Buscar activo..."
                 value={searchTerm}
                 onChange={handleSearch}
                 className="w-full bg-slate-50 pl-11 pr-4 py-2.5 rounded-xl text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-blue-100 transition-all border border-transparent focus:border-blue-200"
               />
             </div>
 
-            {/* Menú de Filtros Desplegable */}
+           {/* Menu de Filtros Desplegable Personalizado */}
             {showFilters && (
-              <div className="w-full md:w-auto animate-in fade-in slide-in-from-left-4 duration-200">
-                <select
-                  value={filterTipo}
-                  onChange={(e) => {
-                    setFilterTipo(e.target.value);
-                    setPaginaActual(1); // Volvemos a la página 1 al filtrar
-                  }}
-                  className="w-full md:w-48 bg-white border border-blue-200 text-blue-800 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all appearance-none cursor-pointer shadow-sm"
+              <div className="w-full md:w-auto animate-in fade-in slide-in-from-left-4 duration-200 relative z-50">
+                
+                {/* reaccion al toque*/}
+                <div 
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="w-full md:w-52 bg-slate-50 border border-slate-200 text-slate-700 rounded-xl pl-4 pr-4 py-2.5 text-sm font-medium flex items-center justify-between cursor-pointer transition-all shadow-sm hover:bg-white hover:border-blue-300 hover:ring-2 hover:ring-blue-100"
                 >
-                  <option value="">Todos los tipos</option>
-                  <option value="equipo">Solo Equipos</option>
-                  <option value="mobiliario">Solo Mobiliario</option>
-                  
-                </select>
+                  <span>
+                    {filterTipo === "" ? "Todos los tipos" : filterTipo === "equipo" ? "Solo Equipos" : "Solo Mobiliario"}
+                  </span>
+                  <svg 
+                    className={`text-slate-400 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180 text-blue-500' : ''}`} 
+                    xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                  >
+                    <path d="m6 9 6 6 6-6"/>
+                  </svg>
+                </div>
+
+                {/*selector */}
+                <div className={`absolute top-full left-0 w-full mt-2 bg-white border border-slate-100 rounded-xl shadow-xl overflow-hidden transition-all duration-200 ${isDropdownOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'}`}>
+                  <div className="flex flex-col">
+                    <button 
+                      onClick={() => { 
+                        setFilterTipo(""); 
+                        setPaginaActual(1); 
+                        setShowFilters(false);
+                        setIsDropdownOpen(false); // se cierra al elegir
+                      }}
+                      className={`text-left px-4 py-3 text-sm font-medium transition-colors hover:bg-blue-50 hover:text-blue-700 border-b border-slate-50 ${filterTipo === "" ? "bg-blue-50 text-blue-700 font-bold" : "text-slate-600"}`}
+                    >
+                      Todos los tipos
+                    </button>
+                    <button 
+                      onClick={() => { 
+                        setFilterTipo("equipo"); 
+                        setPaginaActual(1); 
+                        setShowFilters(false);
+                        setIsDropdownOpen(false); 
+                      }}
+                      className={`text-left px-4 py-3 text-sm font-medium transition-colors hover:bg-blue-50 hover:text-blue-700 border-b border-slate-50 ${filterTipo === "equipo" ? "bg-blue-50 text-blue-700 font-bold" : "text-slate-600"}`}
+                    >
+                      Solo Equipos
+                    </button>
+                    <button 
+                      onClick={() => { 
+                        setFilterTipo("mobiliario"); 
+                        setPaginaActual(1); 
+                        setShowFilters(false);
+                        setIsDropdownOpen(false); 
+                      }}
+                      className={`text-left px-4 py-3 text-sm font-medium transition-colors hover:bg-blue-50 hover:text-blue-700 ${filterTipo === "mobiliario" ? "bg-blue-50 text-blue-700 font-bold" : "text-slate-600"}`}
+                    >
+                      Solo Mobiliario
+                    </button>
+                  </div>
+                </div>
+
               </div>
             )}
           </div>
           
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap self-end md:self-auto mt-2 md:mt-0">
             Total: {totalResultados} Resultados
           </span>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* VISTA ESCRITORIO (md:block)    */}
+        <div className="overflow-x-auto hidden md:block">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/80 text-gima-navy border-b border-slate-100">
@@ -285,22 +327,91 @@ export default function CategoriesPage() {
             </tbody>
           </table>
         </div>
+
+        {/* VISTA TLFN (block md:hidden)          */}
+
+        <div className="block md:hidden bg-slate-50/30 p-4 space-y-4">
+          {isLoading ? (
+            <div className="py-10 flex flex-col items-center justify-center text-slate-500 gap-3">
+              <Loader2 className="w-8 h-8 animate-spin text-gima-blue" />
+              <span className="text-sm font-medium">Cargando información...</span>
+            </div>
+          ) : categories.length > 0 ? (
+            categories.map((item) => (
+              <div key={item.id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4 relative">
+                
+                {/* Cabecera de la tarjeta: Tipo e ID */}
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-bold text-gima-navy text-lg uppercase leading-tight">{item.tipo}</h3>
+                    <p className="text-xs font-medium text-slate-400 mt-1">ID: {item.id}</p>
+                  </div>
+                  <span className="bg-blue-50 text-blue-700 py-1.5 px-3 rounded-lg text-xs font-bold border border-blue-100">
+                    {item.activos} Activos
+                  </span>
+                </div>
+                
+                {/* Detalles del activo */}
+                <div className="grid grid-cols-2 gap-3 text-sm bg-slate-50 rounded-xl p-3">
+                  <div>
+                    <span className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Marca</span>
+                    <span className="font-semibold text-slate-700">{item.marca || "N/A"}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Modelo</span>
+                    <span className="font-semibold text-slate-700">{item.modelo || "N/A"}</span>
+                  </div>
+                </div>
+
+                <div>
+                   <span className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Descripción</span>
+                   <p className="text-sm text-slate-600 line-clamp-2">{item.rawDescripcion || "Sin descripción detallada."}</p>
+                </div>
+
+                {/* Botones de acción */}
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                  <button 
+                    onClick={() => handleEditClick(item)}
+                    className="flex items-center gap-1.5 text-xs text-blue-600 font-bold bg-blue-50/80 px-4 py-2.5 rounded-xl hover:bg-blue-100 transition-colors"
+                  >
+                    <Pencil size={14} /> Editar
+                  </button>
+                  <button 
+                    onClick={() => handleDeleteClick(item.rawId)}
+                    className="flex items-center gap-1.5 text-xs text-red-600 font-bold bg-red-50/80 px-4 py-2.5 rounded-xl hover:bg-red-100 transition-colors"
+                  >
+                    <Trash2 size={14} /> Eliminar
+                  </button>
+                </div>
+
+              </div>
+            ))
+          ) : (
+            <div className="py-12 text-center text-slate-400 bg-white rounded-2xl border border-dashed border-slate-200">
+              <Package className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+              <p className="text-sm font-medium">No se encontraron resultados.</p>
+            </div>
+          )}
+        </div>
         
+        {/* Paginacion (Se muestra tanto en tlfn como en escritorio) */}
         {!isLoading && totalPaginas > 0 && (
-          <Pagination
-            paginaActual={paginaActual}
-            totalPaginas={totalPaginas}
-            porPagina={porPagina}
-            onPageChange={setPaginaActual}
-            onPerPageChange={(nuevoPorPagina) => {
-              setPorPagina(nuevoPorPagina);
-              setPaginaActual(1);
-            }}
-          />
+          <div className="p-4 border-t border-slate-100 bg-white">
+            <Pagination
+              paginaActual={paginaActual}
+              totalPaginas={totalPaginas}
+              porPagina={porPagina}
+              onPageChange={setPaginaActual}
+              onPerPageChange={(nuevoPorPagina) => {
+                setPorPagina(nuevoPorPagina);
+                setPaginaActual(1);
+              }}
+            />
+          </div>
         )}
       </section>
 
-      {/* MODAL PARA CREAR / EDITAR */}
+      {/* MODAL PARA CREAR / EDITAR  */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
           <div className="bg-white rounded-3xl shadow-xl w-full max-w-lg overflow-hidden transform transition-all">
@@ -317,20 +428,62 @@ export default function CategoriesPage() {
             </div>
             
             <form onSubmit={handleSave} className="p-6 space-y-4">
-              <div>
+              
+              <div className="relative">
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Tipo de Activo</label>
-                <select 
-                  required
-                  value={formData.tipo}
-                  onChange={(e) => setFormData({...formData, tipo: e.target.value})}
-                  className="w-full bg-slate-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all appearance-none"
+                
+                <div 
+                  onClick={() => setIsTipoDropdownOpen(!isTipoDropdownOpen)}
+                  className="w-full bg-slate-50 border border-gray-200 text-slate-700 rounded-xl pl-4 pr-4 py-2.5 text-sm flex items-center justify-between cursor-pointer transition-all hover:bg-white hover:border-blue-300 hover:ring-2 hover:ring-blue-100"
                 >
-                  <option value="" disabled>Seleccione un tipo...</option>
-                  <option value="equipo">EQUIPO</option>
-                  <option value="mobiliario">MOBILIARIO</option>
-                  <option value="vehiculo">VEHÍCULO</option>
-                  <option value="herramienta">HERRAMIENTA</option>
-                </select>
+                  <span className={formData.tipo === "" ? "text-slate-400" : "font-medium"}>
+                    {formData.tipo === "" ? "Seleccione un tipo..." : 
+                     formData.tipo === "equipo" ? "EQUIPO" : 
+                     formData.tipo === "mobiliario" ? "MOBILIARIO" : 
+                     formData.tipo === "vehiculo" ? "VEHÍCULO" : 
+                     "HERRAMIENTA"}
+                  </span>
+                  <svg 
+                    className={`text-slate-400 transition-transform duration-300 ${isTipoDropdownOpen ? 'rotate-180 text-blue-500' : ''}`} 
+                    xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                  >
+                    <path d="m6 9 6 6 6-6"/>
+                  </svg>
+                </div>
+
+                {/* Selector de opciones */}
+                <div className={`absolute top-[calc(100%+0.5rem)] left-0 w-full bg-white border border-slate-100 rounded-xl shadow-xl overflow-hidden z-50 transition-all duration-200 ${isTipoDropdownOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'}`}>
+                  <div className="flex flex-col">
+                    {[
+                      { valor: "equipo", etiqueta: "EQUIPO" },
+                      { valor: "mobiliario", etiqueta: "MOBILIARIO" },
+                      { valor: "vehiculo", etiqueta: "VEHÍCULO" },
+                      { valor: "herramienta", etiqueta: "HERRAMIENTA" }
+                    ].map((opcion) => (
+                      <button 
+                        key={opcion.valor}
+                        type="button"
+                        onClick={() => { 
+                          setFormData({...formData, tipo: opcion.valor});
+                          setIsTipoDropdownOpen(false); 
+                        }}
+                        className={`text-left px-4 py-3 text-sm font-medium transition-colors hover:bg-blue-50 hover:text-blue-700 border-b border-slate-50 ${formData.tipo === opcion.valor ? "bg-blue-50 text-blue-700 font-bold" : "text-slate-600"}`}
+                      >
+                        {opcion.etiqueta}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Input oculto para validacion */}
+                <input 
+                  type="text" 
+                  required 
+                  value={formData.tipo} 
+                  onChange={() => {}} 
+                  className="absolute opacity-0 w-0 h-0 -z-10" 
+                  tabIndex={-1} 
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -390,6 +543,7 @@ export default function CategoriesPage() {
         </div>
       )}
 
+      {/* ALERTA DE BORRADO */}
       <DeleteAlert
         isOpen={isAlertOpen}
         onClose={() => setIsAlertOpen(false)}
