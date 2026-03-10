@@ -13,7 +13,6 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-# Comando unificado de docker (soporta 'docker compose' y 'docker-compose')
 if docker compose version &> /dev/null; then
     DOCKER_CMD="docker compose"
 elif command -v docker-compose &> /dev/null; then
@@ -78,16 +77,18 @@ while true; do
     fi
 done
 
-# --- 4. Configurar .env del Backend ---
+# --- 4. Configurar .env del Backend (Seguro para caracteres especiales) ---
 echo -e "\n📄 Configurando entornos..."
 if [ ! -f "backend/.env.example" ]; then
     echo "❌ Error: No se encontró backend/.env.example."
     exit 1
 fi
 cp backend/.env.example backend/.env
-sed -i "s/DB_USERNAME=.*/DB_USERNAME=$DB_USER/" backend/.env
-sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=$DB_PASS/" backend/.env
-sed -i "s/DB_HOST=.*/DB_HOST=db/" backend/.env
+
+# Usamos awk para reemplazar valores sin importar qué caracteres especiales tengan
+awk -v user="$DB_USER" '/^DB_USERNAME=/{print "DB_USERNAME="user; next}1' backend/.env > tmp.env && mv tmp.env backend/.env
+awk -v pass="$DB_PASS" '/^DB_PASSWORD=/{print "DB_PASSWORD=\""pass"\""; next}1' backend/.env > tmp.env && mv tmp.env backend/.env
+awk '/^DB_HOST=/{print "DB_HOST=db"; next}1' backend/.env > tmp.env && mv tmp.env backend/.env
 
 # --- 5. Configurar .env de la IA ---
 if [ ! -f "ia/.env.example" ]; then
@@ -95,8 +96,8 @@ if [ ! -f "ia/.env.example" ]; then
     exit 1
 fi
 cp ia/.env.example ia/.env
-sed -i "s/GROQ_API_KEY=.*/GROQ_API_KEY=$GROQ_KEY/" ia/.env
-sed -i "s/GOOGLE_GENERATIVE_AI_API_KEY=.*/GOOGLE_GENERATIVE_AI_API_KEY=$GOOGLE_KEY/" ia/.env
+awk -v key="$GROQ_KEY" '/^GROQ_API_KEY=/{print "GROQ_API_KEY="key; next}1' ia/.env > tmp.env && mv tmp.env ia/.env
+awk -v key="$GOOGLE_KEY" '/^GOOGLE_GENERATIVE_AI_API_KEY=/{print "GOOGLE_GENERATIVE_AI_API_KEY="key; next}1' ia/.env > tmp.env && mv tmp.env ia/.env
 
 # --- 6. Crear archivo .env principal para Docker ---
 cat <<EOF > .env
@@ -109,16 +110,22 @@ DOCKER_DB_USER=$DB_USER
 DOCKER_DB_PASSWORD=$DB_PASS
 EOF
 
-# --- 7. Levantar servicios de Docker ---
+# --- 7. Instalación de dependencias locales (opcional) ---
+echo -e "\n📦 Comprobando dependencias locales previas (opcional)..."
+set +e
+(cd frontend && pnpm install >/dev/null 2>&1) || echo "⚠️  pnpm no detectado localmente en frontend. Docker lo instalará."
+(cd ia && pnpm install >/dev/null 2>&1) || echo "⚠️  pnpm no detectado localmente en IA. Docker lo instalará."
+set -e
+
+# --- 8. Levantar servicios de Docker ---
 echo -e "\n🐳 Levantando contenedores de Docker..."
 $DOCKER_CMD up -d --build
 
-# --- 8. Configuración interna del contenedor (Migraciones y Claves) ---
+# --- 9. Configuración interna del contenedor (Migraciones y Claves) ---
 echo -e "\n⏳ Esperando 15 segundos a que la base de datos esté lista para recibir conexiones..."
 sleep 15
 
 echo -e "\n⚙️ Configurando Laravel (Dependencias, Key y Migraciones)..."
-# Instalamos dependencias DENTRO del contenedor para que no necesiten PHP en su máquina local
 $DOCKER_CMD exec app composer install
 $DOCKER_CMD exec app php artisan key:generate
 $DOCKER_CMD exec app php artisan migrate --seed

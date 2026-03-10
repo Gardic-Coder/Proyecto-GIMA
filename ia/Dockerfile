@@ -1,19 +1,21 @@
 FROM node:20-alpine
 
+# Habilitar corepack e instalar pnpm globalmente
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 WORKDIR /app
 
-# Copiar los archivos de dependencias
-# Se incluyen comodines por si usas npm, pnpm o yarn
-COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
+# Copiar SOLO los archivos de dependencias primero (para aprovechar el caché de Docker)
+COPY package.json pnpm-lock.yaml* ./
 
-# Instalar dependencias
-RUN npm install
+# Instalar dependencias usando pnpm
+RUN pnpm install
 
-# Copiar el resto del código del proyecto
+# Copiar el resto del código
 COPY . .
 
-# Exponer el puerto por defecto de Next.js
+# Exponer el puerto
 EXPOSE 3000
 
-# Comando para iniciar la aplicación en modo desarrollo
-CMD ["npm", "run", "dev"]
+# Comando para iniciar
+CMD ["pnpm", "dev"]
