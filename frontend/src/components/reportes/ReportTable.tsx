@@ -5,8 +5,8 @@ interface Report {
   id: string;
   asset: string;
   desc: string;
-  priority: Priority; // Aquí obligamos a que sea uno de los 3 tipos
-  status: Status;     // Aquí también
+  priority: Priority;
+  status: Status;
   tech: string;
 }
 
@@ -39,24 +39,46 @@ const reportsData: Report[] = [
 
 export const ReportTable = () => {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className="p-6 border-b border-gray-50">
-        <h2 className="font-bold text-gray-800">Mantenimientos prioritarios pendientes de ejecución</h2>
+    <div className="bg-transparent md:bg-white md:rounded-2xl md:border md:border-gray-100 md:shadow-sm md:overflow-hidden">
+      
+      <div className="p-4 md:p-6 md:border-b md:border-gray-50 mb-4 md:mb-0">
+        <h2 className="font-bold text-gray-800 text-base md:text-lg">Mantenimientos prioritarios pendientes de ejecución</h2>
       </div>
-      <div className="divide-y divide-gray-50">
-        {reportsData.map((report) => (
-          <div key={report.id} className="grid grid-cols-5 items-center p-8 hover:bg-gray-50 transition-colors">
-            <span className="text-gray-400 font-mono text-sm bg-gray-100 w-fit px-4 py-1 rounded">#{report.id}</span>
-            <div>
-              <p className="font-bold text-sm text-gray-800">{report.asset}</p>
-              <p className="text-xs text-gray-500">{report.desc}</p>
+
+      {/* AQUI ESTA EL SCROLL, contenedor que maneja el desbordamiento horizontal */}
+      <div className="w-full overflow-x-auto pb-2 md:pb-0">
+        {/* Le damos un ancho mínimo en PC (md:min-w-[850px]) para que active el scroll si no cabe */}
+        <div className="space-y-4 md:space-y-0 md:divide-y md:divide-gray-50 md:min-w-[850px]">
+          {reportsData.map((report) => (
+            <div 
+              key={report.id} 
+              className="grid grid-cols-2 gap-y-4 gap-x-2 p-4 bg-white rounded-xl border border-gray-100 shadow-sm md:grid-cols-5 md:gap-4 md:p-8 md:bg-transparent md:rounded-none md:border-0 md:shadow-none md:hover:bg-gray-50 md:transition-colors"
+            >
+              <div className="col-span-2 md:col-span-1 order-1 flex items-center">
+                <span className="text-gray-400 font-mono text-sm bg-gray-100 px-4 py-1 rounded">#{report.id}</span>
+              </div>
+              
+              <div className="col-span-1 md:col-span-1 order-2 flex flex-col justify-center">
+                <p className="font-bold text-sm text-gray-800">{report.asset}</p>
+                <p className="text-xs text-gray-500">{report.desc}</p>
+              </div>
+              
+              <div className="col-span-1 md:col-span-1 order-3 flex justify-end md:justify-start items-center">
+                <PriorityBadge priority={report.priority} />
+              </div>
+
+              <div className="col-span-1 md:col-span-1 order-5 md:order-4 flex justify-end md:justify-start items-center">
+                <StatusBadge status={report.status} />
+              </div>
+              
+              <div className="col-span-1 md:col-span-1 order-4 md:order-5 flex items-center md:justify-end">
+                <span className="text-sm font-bold text-gray-700">{report.tech}</span>
+              </div>
             </div>
-            <PriorityBadge priority={report.priority} />
-            <StatusBadge status={report.status} />
-            <span className="text-sm font-bold text-gray-700 text-right">{report.tech}</span>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
+
     </div>
   );
 };
