@@ -6,6 +6,8 @@ import { StatCard } from "@/components/dashboard/StatCard"
 import { UpcomingTasks } from "@/components/dashboard/UpcomingTasks"
 import { AssetStatus } from "@/components/dashboard/AssetStatus"
 import AuthGuard from "@/components/AuthGuard"
+//componente Link de Next.js para poder navegar a la vista de la IA
+import Link from "next/link"
 
 // Importamos el servicio y las interfaces que creamos para la API
 import { 
@@ -55,25 +57,42 @@ export default function DashboardPage() {
 
         <div className="p-8 space-y-8">
           
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Stats Grid - Se cambió de 3 a 4 columnas (lg:grid-cols-4) para que quepa la IA */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            
             {/* Tarjeta 1: Adaptada a Mantenimientos Activos */}
             <StatCard 
               title="Mantenimientos Activos" 
               value={cargando ? "..." : estadisticas?.mantenimientos_activos?.toString() ?? "0"} 
             />
+
             {/* Tarjeta 2: Adaptada a Repuestos en Stock */}
             <StatCard 
               title="Repuestos en Stock" 
               value={cargando ? "..." : estadisticas?.repuestos_stock?.toString() ?? "0"} 
             />
+
             {/* Tarjeta 3: Respetando tus props count y total */}
             <StatCard 
               title="Técnicos disponibles" 
               count={cargando ? 0 : (estadisticas?.tecnicos.disponibles ?? 0)} 
               total={cargando ? 0 : (estadisticas?.tecnicos.total ?? 0)} 
-              highlighted={true} 
             />
+
+            {/* INICIO DE LA INTEGRACIÓN GIMA:
+                Se agregó este Link que envuelve a una StatCard nueva.
+            */}
+            <Link href="/asistencia">
+              <div className="cursor-pointer transition-transform hover:scale-105 active:scale-95">
+                <StatCard 
+                  title="Asistente Inteligente" 
+                  value="Consultar GIMA"
+                  highlighted={true} 
+                />
+              </div>
+            </Link>
+            {/* FIN DE LA INTEGRACIÓN GIMA */}
+
           </div>
 
           {/* Estado de activos: Le pasamos los datos y el estado de carga */}
