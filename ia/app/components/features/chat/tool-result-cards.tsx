@@ -25,7 +25,7 @@ import {
     Copy,
     Check,
 } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 
 // ===========================================
 // Loading Card
@@ -45,7 +45,6 @@ const TOOL_LABELS: Record<string, string> = {
     'tool-consultar_proveedores': 'Cargando proveedores...',
     'tool-generar_checklist': 'Generando checklist con IA...',
     'tool-generar_resumen_actividad': 'Generando resumen con IA...',
-    'tool-crear_orden_trabajo': 'Preparando orden de trabajo...',
 };
 
 export function ToolLoadingCard({ toolName }: ToolLoadingCardProps) {
@@ -69,14 +68,43 @@ interface ToolErrorCardProps {
 }
 
 export function ToolErrorCard({ error, suggestion }: ToolErrorCardProps) {
+    // Log raw error to console for debugging, avoiding render-phase side effects
+    useEffect(() => {
+        if (typeof window !== 'undefined' && error) {
+            console.error('[GIMA Chat Error]:', error);
+        }
+    }, [error]);
+
+    const isContextError =
+        error?.includes('Failed to call a function') ||
+        error?.includes('failed_generation') ||
+        error === 'Error en la herramienta' ||
+        error === 'Error desconocido';
+
+    const isQuotaError =
+        error?.includes('quota') ||
+        error?.includes('Quota') ||
+        error?.includes('Rate limit reached') ||
+        error?.includes('rate_limit_exceeded') ||
+        error?.includes('limit: 0') ||
+        error?.includes('limit: 20');
+
     return (
-        <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-            <AlertCircle className="size-4 text-destructive mt-0.5 shrink-0" />
+        <div className="flex items-start gap-2 p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700">
+            <AlertCircle className="size-4 text-zinc-400 dark:text-zinc-500 mt-0.5 shrink-0" />
             <div>
-                <p className="text-sm text-destructive font-medium">{error}</p>
-                {suggestion && (
-                    <p className="text-xs text-muted-foreground mt-1">{suggestion}</p>
-                )}
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                    {isQuotaError
+                        ? 'Se ha agotado el límite de uso del modelo de IA. Por favor, intenta de nuevo pasado un minuto.'
+                        : isContextError
+                            ? 'El modelo no pudo analizar el contexto.'
+                            : error}
+                </p>
+                <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">
+                    {isQuotaError
+                        ? 'Intenta de nuevo en un momento o verifica tu conexión.'
+                        : (suggestion || (isContextError ? 'Si esto continúa, recargue la página.' : 'Intente de nuevo o consulte al administrador.'))}
+                </p>
             </div>
         </div>
     );
