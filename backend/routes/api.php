@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+// SE AGREGA: Soporte para peticiones HTTP (para conectar con el contenedor de Python)
+use Illuminate\Support\Facades\Http;
 
 // --- Imports de tus compañeros ---
 use App\Http\Controllers\Api\Admin\DireccionController;
@@ -119,6 +121,7 @@ Route::middleware('auth:sanctum')->group(function () {
             ->parameters(['articulos' => 'articulo']);
 
         //api/catalogo/activos/por-tipo
+        //api/catalogo/activos/por-tipo
         Route::get('activos/por-categoria', [ActivoController::class, 'activosPorCategoria']);
         Route::patch('activos/{activo}/status', [ActivoController::class, 'changeStatus']);
 
@@ -135,6 +138,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // --- General ---
     Route::prefix('general')->group(function () {
+        // --- Notificaciones --- //
+        Route::get('/notificaciones', [NotificacionController::class, 'index']);
+        // --- Notificaciones --- //
+        Route::get('/notificaciones', [NotificacionController::class, 'index']);
+        Route::post('/notificaciones', [NotificacionController::class, 'store']);
+        Route::get('/notificaciones/conteo', [NotificacionController::class, 'conteo']);
+        Route::get('/notificaciones/{id}', [NotificacionController::class, 'show']);
+        Route::post('/notificaciones/{id}/marcar-leida', [NotificacionController::class, 'marcarLeida']);
         // --- Notificaciones --- //
         Route::get('/notificaciones', [NotificacionController::class, 'index']);
         Route::post('/notificaciones', [NotificacionController::class, 'store']);
@@ -173,4 +184,27 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notificaciones/sin-leer', [NotificacionController::class, 'unread']);
     Route::post('/notificaciones/{id}/leer', [NotificacionController::class, 'read']);
     Route::post('/notificaciones/leer-todas', [NotificacionController::class, 'readAll']);
-});
+
+  // =========================================================================
+    // INTEGRACIÓN ASISTENTE IA GIMA
+    // =========================================================================
+    Route::post('/consultar-ia', function (Request $request) {
+        $mensaje = $request->input('mensaje');
+        
+        try {
+            // Usamos el nombre del servicio 'ia' definido en el docker-compose
+            // Mantenemos los 300s de timeout para evitar que el frontend se quede colgado esperando una respuesta
+            $response = Http::timeout(300)->post('http://ia:3000/predict', [
+                'prompt' => $mensaje
+            ]);
+
+            return response()->json($response->json());
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error de conexión con el servicio GIMA',
+                'detalle' => $e->getMessage()
+            ], 500);
+        }
+    });
+
+}); // Fin del middleware auth:sanctum

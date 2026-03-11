@@ -6,6 +6,8 @@ import { StatCard } from "@/components/dashboard/StatCard"
 import { UpcomingTasks } from "@/components/dashboard/UpcomingTasks"
 import { AssetStatus } from "@/components/dashboard/AssetStatus"
 import AuthGuard from "@/components/AuthGuard"
+//componente Link de Next.js para poder navegar a la vista de la IA
+import Link from "next/link"; // links para llevar a otros apartados
 
 import { 
   dashboardService, 
@@ -16,9 +18,6 @@ import {
 
 // Iconos para el menu inferior 
 import { Home, Wrench, AlertTriangle, User, ChevronRight } from "lucide-react";
-
-// links para llevar a otros apartados
-import Link from "next/link";
 
 export default function DashboardPage() {
   const [estadisticas, setEstadisticas] = useState<EstadisticasGenerales | null>(null);
@@ -52,61 +51,44 @@ export default function DashboardPage() {
     <AuthGuard>
       <div className="min-h-screen bg-gray-50 overflow-x-hidden">
 
-        {/* vista normal (monitor)                              */}
-        <div className="hidden md:block">
-          <DashboardHeader subtitle="Bienvenido al panel GIMA" showSearch={false} />
-
-          <div className="p-8 space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <StatCard 
-                title="Mantenimientos Activos" 
-                value={cargando ? "..." : estadisticas?.mantenimientos_activos?.toString() ?? "0"} 
-              />
-              <StatCard 
-                title="Repuestos en Stock" 
-                value={cargando ? "..." : estadisticas?.repuestos_stock?.toString() ?? "0"} 
-              />
-              <StatCard 
-                title="Técnicos disponibles" 
-                count={cargando ? 0 : (estadisticas?.tecnicos?.disponibles ?? 0)} 
-                total={cargando ? 0 : (estadisticas?.tecnicos?.total ?? 0)} 
-                highlighted={true} 
-              />
-            </div>
-
-            <AssetStatus datos={activos} cargando={cargando} />
-
-            <UpcomingTasks tareas={agenda} cargando={cargando} />
-          </div>
-        </div>
-
-        {/* vista para tlfn (responsive)                                       */}
- 
-        <div className="block md:hidden p-4 space-y-6 pb-24">
-          <p className="text-gray-600 text-sm mt-2">Bienvenido al panel GIMA</p>
-
-          <div className="space-y-3">
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-              <p className="text-sm text-gray-600 font-medium">Mantenimientos Activos</p>
-              <p className="text-3xl font-bold mt-1 text-gray-900">
-                {cargando ? "..." : estadisticas?.mantenimientos_activos ?? 0}
-              </p>
-            </div>
+        <div className="p-8 space-y-8">
+          
+          {/* Stats Grid - Se cambió de 3 a 4 columnas (lg:grid-cols-4) para que quepa la IA */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-center">
-                <p className="text-sm text-gray-600 font-medium leading-tight">Repuestos en Stock</p>
-                <p className="text-3xl font-bold mt-2 text-gray-900">
-                  {cargando ? "..." : estadisticas?.repuestos_stock ?? 0}
-                </p>
+            {/* Tarjeta 1: Adaptada a Mantenimientos Activos */}
+            <StatCard 
+              title="Mantenimientos Activos" 
+              value={cargando ? "..." : estadisticas?.mantenimientos_activos?.toString() ?? "0"} 
+            />
+
+            {/* Tarjeta 2: Adaptada a Repuestos en Stock */}
+            <StatCard 
+              title="Repuestos en Stock" 
+              value={cargando ? "..." : estadisticas?.repuestos_stock?.toString() ?? "0"} 
+            />
+
+            {/* Tarjeta 3: Respetando tus props count y total */}
+            <StatCard 
+              title="Técnicos disponibles" 
+              count={cargando ? 0 : (estadisticas?.tecnicos.disponibles ?? 0)} 
+              total={cargando ? 0 : (estadisticas?.tecnicos.total ?? 0)} 
+            />
+
+            {/* INICIO DE LA INTEGRACIÓN GIMA:
+                Se agregó este Link que envuelve a una StatCard nueva.
+            */}
+            <Link href="/asistencia">
+              <div className="cursor-pointer transition-transform hover:scale-105 active:scale-95">
+                <StatCard 
+                  title="Asistente Inteligente" 
+                  value="Consultar GIMA"
+                  highlighted={true} 
+                />
               </div>
-              <div className="bg-blue-600 p-4 rounded-xl shadow-sm text-white flex flex-col justify-center">
-                <p className="text-sm font-medium text-blue-100 leading-tight">Técnicos</p>
-                <p className="text-3xl font-bold mt-2">
-                  {cargando ? "..." : `${estadisticas?.tecnicos?.disponibles ?? 0}/${estadisticas?.tecnicos?.total ?? 0}`}
-                </p>
-              </div>
-            </div>
+            </Link>
+            {/* FIN DE LA INTEGRACIÓN GIMA */}
+
           </div>
 
           <div className="-mx-1"> 
