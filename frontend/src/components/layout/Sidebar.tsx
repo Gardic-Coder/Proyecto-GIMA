@@ -13,6 +13,7 @@ import {
   Settings,
   Menu,
   LogOut,
+  Bot
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -74,6 +75,12 @@ export function Sidebar() {
       href: "/configuracion", 
       roles: ["admin"] 
     },
+    {
+      icon: Bot,
+      label: "Asistente IA",
+      href: "http://localhost:3001",
+      roles: ["admin", "supervisor", "tecnico", "reporter"]
+    }
   ];
 
   const filteredItems = menuItems.filter((item) => {
