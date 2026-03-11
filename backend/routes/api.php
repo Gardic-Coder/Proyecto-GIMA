@@ -41,6 +41,24 @@ Route::prefix('autenticacion')->group(function () {
     Route::post('cerrar-sesion', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 });
 
+Route::post('/consultar-ia', function (Request $request) {
+    $mensaje = $request->input('mensaje');
+    
+    try {
+        // 1. Cambiamos la ruta de /predict a /api/chat (que es la real de tu IA)
+        // 2. Cambiamos 'prompt' por el formato de arreglo 'messages' que pide la IA
+        $response = Http::timeout(10)->post('http://ia:3000/api/chat', [
+            'messages' => [
+                ['role' => 'user', 'content' => $mensaje]
+            ]
+        ]);
+
+        return response()->json($response->json());
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'IA no disponible'], 500);
+    }
+});
+
 // --- Rutas Protegidas ---
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -188,23 +206,7 @@ Route::middleware('auth:sanctum')->group(function () {
   // =========================================================================
     // INTEGRACIÓN ASISTENTE IA GIMA
     // =========================================================================
-    Route::post('/consultar-ia', function (Request $request) {
-        $mensaje = $request->input('mensaje');
-        
-        try {
-            // Usamos el nombre del servicio 'ia' definido en el docker-compose
-            // Mantenemos los 300s de timeout para evitar que el frontend se quede colgado esperando una respuesta
-            $response = Http::timeout(300)->post('http://ia:3000/predict', [
-                'prompt' => $mensaje
-            ]);
+    // En backend/routes/api.php
 
-            return response()->json($response->json());
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Error de conexión con el servicio GIMA',
-                'detalle' => $e->getMessage()
-            ], 500);
-        }
-    });
 
 }); // Fin del middleware auth:sanctum

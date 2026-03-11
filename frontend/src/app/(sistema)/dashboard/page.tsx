@@ -74,19 +74,30 @@ export default function DashboardPage() {
               count={cargando ? 0 : (estadisticas?.tecnicos.disponibles ?? 0)} 
               total={cargando ? 0 : (estadisticas?.tecnicos.total ?? 0)} 
             />
+{/*
+            {/* Cambiamos Link por <a> para ir directamente al puerto de la IA /}
+<a href="http://localhost:3001" target="_blank" rel="noopener noreferrer">
+  <div className="cursor-pointer transition-transform hover:scale-105 active:scale-95">
+    <StatCard 
+      title="Asistente Inteligente" 
+      value="Abrir Laboratorio IA"
+      highlighted={true} 
+    />
+  </div>
+</a>
+*/}
 
-            {/* INICIO DE LA INTEGRACIÓN GIMA:
-                Se agregó este Link que envuelve a una StatCard nueva.
-            */}
-            <Link href="/asistencia">
-              <div className="cursor-pointer transition-transform hover:scale-105 active:scale-95">
-                <StatCard 
-                  title="Asistente Inteligente" 
-                  value="Consultar GIMA"
-                  highlighted={true} 
-                />
-              </div>
-            </Link>
+{/* 1. Cambiamos <Link> por <a> porque vamos a un puerto diferente (otra app) */}
+{/* 2. No ponemos target="_blank" para que se abra en la MISMA pestaña */}
+<a href="http://localhost:3001"> 
+  <div className="cursor-pointer transition-transform hover:scale-105 active:scale-95">
+    <StatCard 
+      title="Asistente Inteligente" 
+      value="Abrir Laboratorio IA"
+      highlighted={true} 
+    />
+  </div>
+</a>
             {/* FIN DE LA INTEGRACIÓN GIMA */}
 
           </div>

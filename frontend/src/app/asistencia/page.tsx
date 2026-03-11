@@ -31,12 +31,17 @@ export default function AsistenciaPage() {
     setConversacion(prev => [...prev, { rol: 'user', texto: mensajeUsuario }]);
 
     try {
-      // Petición al backend de Laravel en el puerto 8000
       const response = await fetch("http://localhost:8000/api/consultar-ia", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mensaje: mensajeUsuario }),
-      });
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        // 1. OBLIGATORIO: Para que Laravel responda JSON y no el HTML con el "<"
+        "Accept": "application/json", 
+        // 2. OBLIGATORIO: Para pasar el muro de seguridad de Sanctum
+        "Authorization": `Bearer ${localStorage.getItem('token')}` 
+      },
+      body: JSON.stringify({ mensaje: mensajeUsuario }),
+    });
 
       const data = await response.json();
 
