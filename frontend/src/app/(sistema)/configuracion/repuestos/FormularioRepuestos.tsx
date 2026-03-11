@@ -1,22 +1,30 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, Calendar, Clock, X } from 'lucide-react';
+import { Box, Calendar, Clock, X, Loader2 } from 'lucide-react';
+import { useAuth } from "@/context/AuthContext";
+import { repuestosService } from "@/services/repuestosService";
 
 interface Props {
   isOpen: boolean;
+  repuestoToEdit?: any; 
   onClose: () => void;
 }
 
-export const FormularioRepuestos = ({ isOpen, onClose }: Props) => {
+export const FormularioRepuestos = ({ isOpen, repuestoToEdit, onClose }: Props) => {
+  const { user } = useAuth();
+  const [isSaving, setIsSaving] = useState(false);
+
   const [formData, setFormData] = useState({
-    nombre: "",
-    stockActual: "",
-    stockMinimo: "",
+    id: null as number | null,
+    codigo: "", 
+    nombre: "", // En tu BD es 'descripcion'
+    stockActual: "", // En tu BD es 'stock'
+    stockMinimo: "", // En tu BD es 'stock_minimo'
     costo: "",
-    descripcion: "",
-    proveedor: "",
-    ubicacion: "",
+    descripcion: "", // Este campo es extra en la UI, no está en tu BD aún
+    proveedor: "", // UI text (temporal)
+    ubicacion: "", // UI text (temporal)
     fechaRegistro: "",
     ultimaModificacion: ""
   });
@@ -33,13 +41,39 @@ export const FormularioRepuestos = ({ isOpen, onClose }: Props) => {
   useEffect(() => {
     if (isOpen) {
       const ahora = new Date();
-      setFormData(prev => ({
-        ...prev,
-        fechaRegistro: prev.fechaRegistro || formatearFecha(ahora),
-        ultimaModificacion: formatearFechaHora(ahora)
-      }));
+      if (repuestoToEdit) {
+        // MODO EDICIÓN
+        setFormData({
+          id: repuestoToEdit.id,
+          codigo: repuestoToEdit.codigo || "",
+          nombre: repuestoToEdit.descripcion || "", 
+          stockActual: repuestoToEdit.stock || "",
+          stockMinimo: repuestoToEdit.stock_minimo || "", // Dato de Laravel
+          costo: repuestoToEdit.costo || "",
+          descripcion: "", 
+          proveedor: repuestoToEdit.proveedor?.nombre || repuestoToEdit.proveedor?.razon_social || "",
+          ubicacion: repuestoToEdit.direccion?.nombre || repuestoToEdit.direccion?.ubicacion || "",
+          fechaRegistro: repuestoToEdit.created_at ? formatearFecha(new Date(repuestoToEdit.created_at)) : formatearFecha(ahora),
+          ultimaModificacion: formatearFechaHora(ahora)
+        });
+      } else {
+        // MODO CREACIÓN
+        setFormData({
+          id: null,
+          codigo: "",
+          nombre: "",
+          stockActual: "",
+          stockMinimo: "",
+          costo: "",
+          descripcion: "",
+          proveedor: "",
+          ubicacion: "",
+          fechaRegistro: formatearFecha(ahora),
+          ultimaModificacion: formatearFechaHora(ahora)
+        });
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, repuestoToEdit]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -54,32 +88,56 @@ export const FormularioRepuestos = ({ isOpen, onClose }: Props) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.nombre) {
-      alert("Por favor, ingresa el nombre del repuesto");
+      alert("Por favor, ingresa el nombre/descripción del repuesto");
       return;
     }
+    if (!user?.token) return;
 
-    // ===================================================
-    // AQUÍ EL BACKEND DEBE PONER SU CONEXIÓN (API CALL) 
-    // ===================================================
-    console.log("Enviando datos al servidor...", formData);
+    setIsSaving(true);
+
     try {
-      // Lógica de conexión aquí
-      alert(`¡Repuesto "${formData.nombre}" procesado correctamente`);
-      onClose();
-    } catch (error) {
-      alert("Error de conexión con el servidor.");
+      // MAPEAMOS AL CONTROLADOR DE LARAVEL
+      const dataToSend = {
+          descripcion: formData.nombre,       
+          codigo: formData.codigo,            
+          costo: Number(formData.costo) || 0, 
+          stock: Number(formData.stockActual) || 0, 
+          stock_minimo: Number(formData.stockMinimo) || 0, 
+          
+          // IMPORTANTE: Tu backend exige 'proveedor_id' obligatoriamente.
+          // Como ahora tienes un input de texto, enviamos '1' para que Laravel lo acepte.
+          // En el futuro, cambiaremos el input de UI por un selector desplegable real.
+          proveedor_id: 1, 
+          direccion_id: null, 
+      };
+
+      if (formData.id) {
+          await repuestosService.update(user.token, formData.id, dataToSend);
+      } else {
+          await repuestosService.create(user.token, dataToSend);
+      }
+      
+      onClose(); // Cierra y actualiza la tabla
+    } catch (error: any) {
+      console.error("Error al guardar:", error);
+      alert(error.message || "Error de conexión con el servidor al guardar el repuesto.");
+    } finally {
+        setIsSaving(false);
     }
-    // ====================================================
   };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={!isSaving ? onClose : undefined} />
       
       <div className="relative w-full max-w-3xl bg-white rounded-[40px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-        <button onClick={onClose} className="absolute top-8 right-8 text-gray-400 hover:text-gray-600 transition-colors">
+        <button 
+            onClick={onClose} 
+            disabled={isSaving}
+            className="absolute top-8 right-8 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+        >
           <X size={24} />
         </button>
 
@@ -95,9 +153,12 @@ export const FormularioRepuestos = ({ isOpen, onClose }: Props) => {
                 value={formData.nombre}
                 onChange={handleChange}
                 placeholder="Nombre de repuesto"
-                className="text-2xl font-bold text-slate-800 tracking-tight w-full outline-none placeholder:text-gray-300"
+                className="text-2xl font-bold text-slate-800 tracking-tight w-full outline-none placeholder:text-gray-300 bg-transparent"
+                disabled={isSaving}
               />
-              <p className="text-xs text-gray-400 font-mono">ID: h12345</p>
+              <p className="text-xs text-gray-400 font-mono">
+                {formData.id ? `ID: ${formData.id}` : 'Nuevo Repuesto'}
+              </p>
             </div>
           </div>
 
@@ -110,10 +171,12 @@ export const FormularioRepuestos = ({ isOpen, onClose }: Props) => {
                 <input 
                   name="stockActual"
                   type="number"
+                  min="0"
                   value={formData.stockActual}
                   placeholder="0"
-                  className="w-full text-center text-xl font-bold text-slate-700 outline-none"
+                  className="w-full text-center text-xl font-bold text-slate-700 outline-none bg-transparent"
                   onChange={handleChange}
+                  disabled={isSaving}
                 />
                 <span className="text-[10px] text-gray-400 font-bold uppercase mt-1">unidades</span>
               </div>
@@ -122,10 +185,12 @@ export const FormularioRepuestos = ({ isOpen, onClose }: Props) => {
                 <input 
                   name="stockMinimo"
                   type="number"
+                  min="0"
                   value={formData.stockMinimo}
                   placeholder="0"
-                  className="w-full text-center text-xl font-bold text-slate-700 outline-none"
+                  className="w-full text-center text-xl font-bold text-slate-700 outline-none bg-transparent"
                   onChange={handleChange}
+                  disabled={isSaving}
                 />
                 <span className="text-[10px] text-gray-400 font-bold uppercase mt-1">unidades</span>
               </div>
@@ -136,10 +201,13 @@ export const FormularioRepuestos = ({ isOpen, onClose }: Props) => {
                    <input 
                     name="costo"
                     type="number"
+                    step="0.01"
+                    min="0"
                     value={formData.costo}
                     placeholder="0.00"
                     className="w-full text-center text-xl font-bold text-slate-800 bg-transparent outline-none"
                     onChange={handleChange}
+                    disabled={isSaving}
                   />
                 </div>
               </div>
@@ -151,8 +219,9 @@ export const FormularioRepuestos = ({ isOpen, onClose }: Props) => {
                 name="descripcion"
                 value={formData.descripcion}
                 placeholder="Rodamiento de Bolas de Alta Precisión - Serie 6200"
-                className="w-full p-6 border-2 border-gray-200 rounded-[24px] min-h-[120px] text-gray-600 text-sm outline-none bg-slate-50/30 focus:border-emerald-500/30 transition-colors"
+                className="w-full p-6 border-2 border-gray-200 rounded-[24px] min-h-[120px] text-gray-600 text-sm outline-none bg-slate-50/30 focus:border-emerald-500/30 transition-colors resize-none"
                 onChange={handleChange}
+                disabled={isSaving}
               />
             </div>
 
@@ -162,9 +231,10 @@ export const FormularioRepuestos = ({ isOpen, onClose }: Props) => {
                 <input 
                   name="proveedor"
                   value={formData.proveedor}
-                  className="w-full p-4 border-2 border-gray-200 rounded-[20px] text-center text-gray-600 font-bold outline-none focus:border-emerald-500/30 transition-colors"
+                  className="w-full p-4 border-2 border-gray-200 rounded-[20px] text-center text-gray-600 font-bold outline-none focus:border-emerald-500/30 transition-colors bg-transparent"
                   placeholder="---"
                   onChange={handleChange}
+                  disabled={isSaving}
                 />
               </div>
               <div className="space-y-2">
@@ -172,9 +242,10 @@ export const FormularioRepuestos = ({ isOpen, onClose }: Props) => {
                 <input 
                   name="ubicacion"
                   value={formData.ubicacion}
-                  className="w-full p-4 border-2 border-gray-200 rounded-[20px] text-center text-gray-600 font-bold outline-none focus:border-emerald-500/30 transition-colors"
+                  className="w-full p-4 border-2 border-gray-200 rounded-[20px] text-center text-gray-600 font-bold outline-none focus:border-emerald-500/30 transition-colors bg-transparent"
                   placeholder="---"
                   onChange={handleChange}
+                  disabled={isSaving}
                 />
               </div>
             </div>
@@ -185,15 +256,15 @@ export const FormularioRepuestos = ({ isOpen, onClose }: Props) => {
                   <Calendar size={18} className="text-emerald-500" />
                   <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-[0.15em]">FECHA DE REGISTRO</span>
                 </div>
-                <span className="text-sm font-bold text-slate-400 tracking-tight">{formData.fechaRegistro || "DD/M/AAAA"}</span>
+                <span className="text-sm font-bold text-slate-400 tracking-tight">{formData.fechaRegistro}</span>
               </div>
 
               <div className="flex items-center justify-between p-4 border-2 border-gray-100 rounded-2xl bg-white">
                 <div className="flex items-center gap-3">
                   <Clock size={18} className="text-emerald-500" />
-                  <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-[0.15em]">ÚLTIMO MODIFICACIÓN</span>
+                  <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-[0.15em]">ÚLTIMA MODIFICACIÓN</span>
                 </div>
-                <span className="text-sm font-bold text-slate-400 tracking-tight">{formData.ultimaModificacion || "DD/MM/AAA 00:00:00"}</span>
+                <span className="text-sm font-bold text-slate-400 tracking-tight">{formData.ultimaModificacion}</span>
               </div>
             </div>
 
@@ -201,15 +272,18 @@ export const FormularioRepuestos = ({ isOpen, onClose }: Props) => {
               <button 
                 type="button" 
                 onClick={onClose} 
-                className="flex-1 py-4 border-2 border-gray-200 rounded-full text-gray-400 font-bold text-[10px] uppercase hover:bg-gray-50 transition-all tracking-[0.2em]"
+                disabled={isSaving}
+                className="flex-1 py-4 border-2 border-gray-200 rounded-full text-gray-400 font-bold text-[10px] uppercase hover:bg-gray-50 transition-all tracking-[0.2em] disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button 
                 type="submit" 
-                className="flex-1 py-4 bg-blue-600 text-white rounded-full font-bold text-[10px] uppercase hover:bg-blue-700 shadow-xl shadow-blue-200 transition-all tracking-[0.2em]"
+                disabled={isSaving}
+                className="flex-1 py-4 bg-blue-600 text-white rounded-full font-bold text-[10px] uppercase hover:bg-blue-700 shadow-xl shadow-blue-200 transition-all tracking-[0.2em] flex items-center justify-center gap-2 disabled:opacity-70"
               >
-                Guardar
+                {isSaving ? <Loader2 size={16} className="animate-spin" /> : null}
+                {isSaving ? "Guardando..." : "Guardar"}
               </button>
             </div>
           </form>
