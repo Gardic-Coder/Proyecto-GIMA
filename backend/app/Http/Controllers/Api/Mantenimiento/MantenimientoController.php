@@ -42,13 +42,15 @@ class MantenimientoController extends Controller
      * Listar mantenimientos con sus relaciones usando el Resource.
      */
     public function index(Request $request)
-    {
-        $mantenimientos = Mantenimiento::with(['activo', 'tecnicoPrincipal']) // Ajusta tus relaciones
-            ->when($request->search, fn($q, $v) => $q->search($v))
-            ->when($request->sede_id, fn($q, $v) => $q->porSede($v))
-            ->when($request->solo_activos, fn($q) => $q->activos())
-            ->when($request->tecnico_id, fn($q, $v) => $q->where('tecnico_principal_id', $v))
-            ->paginate(15);
+        {
+            $limite = $request->input('limite', 5); 
+
+            $mantenimientos = Mantenimiento::with(['activo', 'tecnicoPrincipal']) // Ajusta tus relaciones
+                ->when($request->search, fn($q, $v) => $q->search($v))
+                ->when($request->sede_id, fn($q, $v) => $q->porSede($v))
+                ->when($request->solo_activos, fn($q) => $q->activos())
+                ->when($request->tecnico_id, fn($q, $v) => $q->where('tecnico_principal_id', $v))
+                ->paginate(5);
 
         return response()->json($mantenimientos);
     }
