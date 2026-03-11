@@ -93,14 +93,13 @@ export default function Mantenimiento() {
       try {
         const [dataBackend, dataStats] = await Promise.all([
           mantenimientoService.getMantenimientos(currentPage),
-          mantenimientoService.getEstadisticasResumen(),
         ]);
 
-        setStats({
-          pendientes: dataStats.pendientes,
-          enProceso: dataStats.en_proceso,
-          completadas: dataStats.completadas,
-        });
+        // setStats({
+        //   pendientes: dataStats.pendientes,
+        //   enProceso: dataStats.en_proceso,
+        //   completadas: dataStats.completadas,
+        // });
 
 
         const ordenesAdaptadas: Orden[] = dataBackend.data.map((item: any) => {
@@ -284,9 +283,6 @@ export default function Mantenimiento() {
   );
 
   return (
-
-    <AuthGuard roleRequired={["admin", "supervisor", "tecnico"]}>
-
     <div className="min-h-screen p-6 bg-gray-50/50 text-gray-800 font-sans">
       {/* HEADER */}
       <div className="flex justify-between items-center mb-6">
