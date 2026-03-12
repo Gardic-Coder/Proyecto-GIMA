@@ -245,7 +245,7 @@ export const FormularioRepuestos = ({ isOpen, repuestoToEdit, onClose }: Props) 
               />
             </div>
 
-            <grid className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
               {/* SELECT DE PROVEEDORES DINÁMICO */}
               <div className="space-y-2">
                 <label className="text-[11px] font-bold text-emerald-500 uppercase ml-2 md:ml-4 tracking-wider">PROVEEDOR PRINCIPAL</label>
@@ -298,6 +298,7 @@ export const FormularioRepuestos = ({ isOpen, repuestoToEdit, onClose }: Props) 
 
                 <span className="text-sm font-bold text-slate-400 tracking-tight sm:text-right pl-7 sm:pl-0">{formData.ultimaModificacion || "DD/MM/AAA 00:00:00"}</span>
 
+              </div>
             </div>
 
             <div className="flex gap-3 md:gap-4 pt-4">
@@ -312,8 +313,7 @@ export const FormularioRepuestos = ({ isOpen, repuestoToEdit, onClose }: Props) 
               <button 
                 type="submit" 
                 disabled={isSaving}
-                className="flex-1 py-3 md:py-4 bg-blue-600 text-white rounded-full font-bold text-[10px] uppercase hover:bg-blue-700 shadow-xl shadow-blue-200 transition-all tracking-[0.1em] md:tracking-[0.2em]"
-
+                className="flex-1 py-4 bg-blue-600 text-white rounded-full font-bold text-[10px] uppercase hover:bg-blue-700 shadow-xl shadow-blue-200 transition-all tracking-[0.2em] flex items-center justify-center gap-2 disabled:opacity-70"
               >
                 {isSaving ? <Loader2 size={16} className="animate-spin" /> : null}
                 {isSaving ? "Guardando..." : "Guardar"}

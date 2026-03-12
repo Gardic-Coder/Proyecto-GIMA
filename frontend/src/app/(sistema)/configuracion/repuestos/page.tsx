@@ -90,9 +90,10 @@ export default function RepuestosPage() {
   };
 
   return (
-    // Contenedor principal
-    <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8">
-      <DashboardHeader />
+    <AuthGuard>
+      {/* Contenedor principal */}
+      <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8">
+        <DashboardHeader />
       <div className="w-full mx-auto">
 
         {/* BOTÓN VOLVER */}
@@ -219,6 +220,7 @@ export default function RepuestosPage() {
           description="Esta acción no se puede deshacer y el repuesto será borrado del sistema."
         />
 
+      </div>
       </div>
     </AuthGuard>
   );

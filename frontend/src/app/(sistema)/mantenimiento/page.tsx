@@ -92,17 +92,7 @@ export default function Mantenimiento() {
     const cargarDatos = async () => {
       setCargando(true);
       try {
-        const [dataBackend, dataStats] = await Promise.all([
-          mantenimientoService.getMantenimientos(currentPage),
-          mantenimientoService.getEstadisticasResumen(),
-        ]);
-
-        setStats({
-          pendientes: dataStats.pendientes,
-          enProceso: dataStats.en_proceso,
-          completadas: dataStats.completadas,
-        });
-
+        const dataBackend = await mantenimientoService.getMantenimientos(currentPage);
 
         const ordenesAdaptadas: Orden[] = dataBackend.data.map((item: any) => {
           let estadoUI = "pendiente";
