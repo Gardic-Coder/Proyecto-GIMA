@@ -247,6 +247,15 @@ export default function LoginPage() {
               <ArrowRight className="w-5 h-5" />
             </button>
           </form>
+
+          <div className="mt-4 md:mt-6 text-center">
+              <p className="text-xs md:text-sm text-gray-600">
+                ¿No tienes cuenta?{" "}
+                <Link href="/auth/register" className="text-blue-600 hover:text-blue-700 font-medium">
+                  Regístrate
+                </Link>
+              </p>
+            </div>
         </div>
       </div>
     </div>
