@@ -14,7 +14,7 @@ export interface ReporteMantenimientos {
 export const reportesService = {
   getMantenimientos: async (): Promise<ReporteMantenimientos[]> => {
     try {
-      const response = await api.get('reportes/mantenimientos');
+      const response = await api.get('mantenimiento/reportes');
       return response.data;
     } catch (error) {
       console.error("Error en reporte de mantenimientos (Probable saturación):", error);
