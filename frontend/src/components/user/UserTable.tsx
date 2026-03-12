@@ -224,9 +224,11 @@ export default function UserTable() {
                                 <th className="px-6 py-3 text-center text-xs font-bold uppercase tracking-wider" style={{ color: "#0B2545" }}>
                                     ROL/CARGO
                                 </th>
+                                {/*
                                 <th className="px-6 py-3 text-center text-xs font-bold uppercase tracking-wider" style={{ color: "#0B2545" }}>
                                     DEPARTAMENTO
                                 </th>
+                                */}
                                 <th className="px-6 py-3 text-center text-xs font-bold uppercase tracking-wider" style={{ color: "#0B2545" }}>
                                     ESTADO
                                 </th>
@@ -290,10 +292,12 @@ export default function UserTable() {
                                             <span className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Rol / Cargo</span>
                                             <span className="font-semibold text-slate-700 capitalize truncate block">{user.rol || 'N/A'}</span>
                                         </div>
+                                        {/*
                                         <div className="min-w-0">
                                             <span className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Departamento</span>
                                             <span className="font-semibold text-slate-700 truncate block">{user.department || 'N/A'}</span>
                                         </div>
+                                        */}
                                     </div>
 
                                     {/* botones de accion */}

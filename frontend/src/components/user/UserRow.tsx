@@ -41,11 +41,13 @@ export default function UserRow({ user, onEliminar, onEditar }: UserRowProps) {
             <td className="p-4 text-center">{user.rol}</td>
 
             {/* Columna DEPARTAMENTO */}
+            {/*
             <td className="p-4 text-center" >
                 <div className=" text-white py-1 rounded-lg" style={{ backgroundColor: "lightgray",   }}>
                     <span className=" py-1 rounded-full text-black" > {user.department} </span>
                 </div>
             </td>
+            */}
 
             {/* Columna ESTADO */}
             <td className="p-4 text-center">

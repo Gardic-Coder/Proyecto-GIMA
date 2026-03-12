@@ -21,7 +21,7 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
     const [nombre, setNombre] = useState('');
     const [email, setEmail] = useState('');
     const [rol, setRol] = useState('Administrador');
-    const [departamento, setDepartamento] = useState('Infraestructura');
+    //const [departamento, setDepartamento] = useState('Infraestructura');
     const [estado, setEstado] = useState<User['status']>('available');
 
     // Efecto para cargar datos cuando se edita (Editar)
@@ -30,14 +30,14 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
             setNombre(user.name);
             setEmail(user.email);
             setRol(user.rol);
-            setDepartamento(user.department);
+            //setDepartamento(user.department);
             setEstado(user.status);
         } else {
             // Resetear formulario para nuevo usuario (Crear)
             setNombre('');
             setEmail('');
             setRol('Administrador');
-            setDepartamento('Infraestructura');
+            //setDepartamento('Infraestructura');
             setEstado('available');
         }
     }, [user, isOpen]); //Se ejecuta solo si User o isOpen se alteran
@@ -54,7 +54,7 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
             nombre,
             email,
             rol, // Ej: "admin" o "tecnico"
-            departamento,
+            //departamento,
             estado,
         };
 
@@ -104,7 +104,7 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
                             <option value="reporter">Reporter</option>
                         </select>
                     </div>
-
+                    {/*
                     <div>
                         <label className="block text-sm font-medium mb-1">Departamento</label>
                         <select
@@ -120,6 +120,7 @@ export default function UserModal({ isOpen, onClose, onSave, user }: UserModalPr
                             <option value="Finanzas">Finanzas</option>
                         </select>
                     </div>
+                    */}
 
                     <div>
                         <label className="block text-sm font-medium mb-1">Estado</label>
