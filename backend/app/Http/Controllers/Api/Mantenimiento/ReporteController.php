@@ -224,10 +224,10 @@ class ReporteController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'activo_id'   => 'required|exists:activos,id',
+            'activo_id' => 'required|exists:activos,id',
             'descripcion' => 'required|string|min:10',
-            'prioridad'   => ['required', Rule::enum(NivelPrioridad::class)],
-            'estado'      => ['required', Rule::enum(EstadoReporte::class)],
+            'prioridad' => ['required', Rule::enum(NivelPrioridad::class)],
+            'estado' => ['required', Rule::enum(EstadoReporte::class)],
         ]);
 
         $reporte = Reporte::create([
@@ -322,10 +322,10 @@ class ReporteController extends Controller
     public function update(Request $request, Reporte $reporte)
     {
         $validated = $request->validate([
-            'activo_id'   => 'sometimes|exists:activos,id',
+            'activo_id' => 'sometimes|exists:activos,id',
             'descripcion' => 'sometimes|string|min:10',
-            'prioridad'   => ['sometimes', Rule::enum(NivelPrioridad::class)],
-            'estado'      => ['sometimes', Rule::enum(EstadoReporte::class)],
+            'prioridad' => ['sometimes', Rule::enum(NivelPrioridad::class)],
+            'estado' => ['sometimes', Rule::enum(EstadoReporte::class)],
         ]);
 
         $reporte->update($validated);

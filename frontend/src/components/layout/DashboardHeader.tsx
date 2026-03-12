@@ -31,7 +31,7 @@ export function DashboardHeader({ title, subtitle = "Bienvenido al panel GIMA" ,
 
         {/* Header actions: shrink-0 protege a los iconos de ser aplastados */}
         <div className="flex items-center gap-2 md:gap-4 shrink-0">
-          {/* Search */}
+          {/* Search 
           {showSearch && (
           <div className="relative hidden sm:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -42,6 +42,7 @@ export function DashboardHeader({ title, subtitle = "Bienvenido al panel GIMA" ,
             />
           </div>
         )}
+        */}
 
         </div>
       </div>

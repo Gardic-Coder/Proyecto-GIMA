@@ -68,6 +68,7 @@ export default function CalendarioMantenimientoPage() {
           </Link>
 
           <div className="flex items-center gap-3">
+            {/*
             <div className="relative hidden sm:block">
               <input
                 type="text"
@@ -76,6 +77,8 @@ export default function CalendarioMantenimientoPage() {
               />
               <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 2a8 8 0 105.293 14.293l4.707 4.707 1.414-1.414-4.707-4.707A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4z"/></svg>
             </div>
+            */}
+            {/*
             <button
               disabled={selected == null}
               onClick={() => {
@@ -94,6 +97,7 @@ export default function CalendarioMantenimientoPage() {
             >
               Crear orden de mantenimiento
             </button>
+            */}
           </div>
         </div>
 

@@ -53,7 +53,7 @@ export default function ConfiguracionPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 mb-6 md:mb-8">
         <h1 className="text-2xl font-bold text-black">Configuración</h1>
-
+        {/*
         <div className="relative w-full sm:w-auto">
           <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
           <input
@@ -61,7 +61,9 @@ export default function ConfiguracionPage() {
             placeholder="Buscar"
             className="w-full pl-10 pr-4 py-2 rounded-full border bg-white outline-none focus:border-gray-300 transition-colors"
           />
+          
         </div>
+        */}
       </div>
 
       {/* Cards */}
@@ -70,7 +72,7 @@ export default function ConfiguracionPage() {
   <ConfigCard
     title="Historial de usuarios"
     desc="Registros de actividad"
-    icon={<User size={24} />}
+    icon={<User size={24} className="text-red-500" />}
     href="/configuracion/historial"
   />
 
@@ -80,14 +82,14 @@ export default function ConfiguracionPage() {
    icon={<User size={24} className="text-blue-500" />}
     href="/configuracion/User"
   />
-
+  {/*
   <ConfigCard
     title="Ubicaciones"
     desc="Gestionar ubicaciones"
     icon={<Globe size={24} className="text-red-500" />}
     href="/configuracion/ubicaciones"
   />
-
+  */}
   <ConfigCard
     title="Gestión de repuestos"
     desc="Administrar materiales y herramientas"
