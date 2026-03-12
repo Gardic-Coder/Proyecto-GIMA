@@ -63,12 +63,12 @@ export function Sidebar() {
       href: "/mantenimiento", 
       roles: ["admin", "tecnico", "supervisor"] 
     },
-    { 
+    /*{ 
       icon: ClipboardList, 
       label: "Reportes", 
       href: "/reportes", 
       roles: ["admin", "reporter", "supervisor"] 
-    },
+    },*/
     { 
       icon: Settings, 
       label: "Configuración", 
