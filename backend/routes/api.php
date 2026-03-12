@@ -43,7 +43,7 @@ Route::prefix('autenticacion')->group(function () {
 
 Route::post('/consultar-ia', function (Request $request) {
     $mensaje = $request->input('mensaje');
-    
+
     try {
         // 1. Cambiamos la ruta de /predict a /api/chat (que es la real de tu IA)
         // 2. Cambiamos 'prompt' por el formato de arreglo 'messages' que pide la IA
@@ -71,7 +71,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // ==========================================
 
     // 1. Main Dashboard (Exclusivo para Admin y Supervisor)
-    Route::middleware(['role:admin|supervisor'])->prefix('dashboard/main')->group(function () {
+    Route::middleware(['role:admin|supervisor|reporter|tecnico'])->prefix('dashboard/main')->group(function () {
 
         Route::get('/estadisticas', [MainDashboardController::class, 'estadisticasGenerales']);
         Route::get('/activos-estado', [MainDashboardController::class, 'barraActivos']);
@@ -190,23 +190,27 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::apiResource('repuestos', RepuestoController::class);
 
-        //indexStock eliminada, se maneja con el query param 'alerta_stock' en el index general
-        //Route::get('stock', [RepuestoController::class, 'indexStock']);
-
-        // RUTA MODIFICADA: Acción específica para modificar el stock
-        Route::patch('repuestos/{repuesto}/stock', [RepuestoController::class, 'ajustarStock']);
+        Route::get('stock', [RepuestoController::class, 'indexStock']);
+        Route::match(['put', 'patch'], 'stock/{id}', [RepuestoController::class, 'updateStock']);
     });
 
+    //#######################################
+    // --- Modulo: Reporter --- USUARIO QUE HACE REPORTES Y PUEDE VER SUS REPORTES ASIGNADOS ---
+    //#######################################
+    Route::middleware(['role:reporter'])->group(function () {
+        Route::get('/mis-reportes', [ReporteController::class, 'verMisReportes']);
+        Route::get('/mis-reportes/{reporte}', [ReporteController::class, 'show']);
+        Route::post('/mis-reportes', [ReporteController::class, 'store']);
+    });
+
+
+    //#######################################
     // --- Modulo: Notificaciones ---
+    //#######################################
+
     Route::get('/notificaciones', [NotificacionController::class, 'index']);
     Route::get('/notificaciones/sin-leer', [NotificacionController::class, 'unread']);
     Route::post('/notificaciones/{id}/leer', [NotificacionController::class, 'read']);
     Route::post('/notificaciones/leer-todas', [NotificacionController::class, 'readAll']);
 
-  // =========================================================================
-    // INTEGRACIÓN ASISTENTE IA GIMA
-    // =========================================================================
-    // En backend/routes/api.php
-
-
-}); // Fin del middleware auth:sanctum
+});

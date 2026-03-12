@@ -48,7 +48,7 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <AuthGuard>
+    <AuthGuard roleRequired={['admin', 'supervisor', 'reporter', 'tecnico']}>
       <div className="min-h-screen bg-gray-50 overflow-x-hidden">
         {/* vista normal (monitor)                              */}
         <div className="hidden md:block">
