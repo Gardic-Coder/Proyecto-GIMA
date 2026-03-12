@@ -197,7 +197,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //#######################################
     // --- Modulo: Reporter --- USUARIO QUE HACE REPORTES Y PUEDE VER SUS REPORTES ASIGNADOS ---
     //#######################################
-    Route::middleware(['role:reporter'])->group(function () {
+    Route::middleware(['role:reporter|admin|supervisor|tecnico'])->group(function () {
         Route::get('/mis-reportes', [ReporteController::class, 'verMisReportes']);
         Route::get('/mis-reportes/{reporte}', [ReporteController::class, 'show']);
         Route::post('/mis-reportes', [ReporteController::class, 'store']);
