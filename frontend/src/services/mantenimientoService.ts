@@ -17,7 +17,7 @@ export interface PaginatedResponse {
 
 export const mantenimientoService = {
     async getMantenimientos(page: number = 1, perPage: number = 5): 
-    Promise<PaginatedResponse[]> {
+    Promise<PaginatedResponse> {
         const response = await api.get(`/mantenimiento/mantenimientos?page=${page}&per_page=${perPage}`);
 
         return response.data;
