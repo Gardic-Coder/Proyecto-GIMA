@@ -1,9 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useState, useEffect } from "react";
 import { reportesService } from "@/services/reportesService";
 
-// Tipos estrictos para mantener tus Badges a salvo
 type Priority = 'ALTA' | 'MEDIA' | 'BAJA';
 type Status = 'COMPLETADO' | 'EN PROCESO' | 'PROGRAMADO';
 
@@ -17,31 +17,28 @@ interface Report {
 }
 
 export const ReportTable = () => {
-  // 1. Estados para el fetching
   const [reportes, setReportes] = useState<Report[]>([]);
   const [cargando, setCargando] = useState(true);
   
-  // 2. Estados para la paginación
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  
+  // LÍMITE DE PAGINACIÓN: Solo 5 registros por página para no romper el diseño
+  const REGISTROS_POR_PAGINA = 5; 
 
-  // 3. Efecto para buscar los datos
   useEffect(() => {
     const fetchReportes = async () => {
       setCargando(true);
       try {
-        const response = await reportesService.getMantenimientos(currentPage);
+        const response = await reportesService.getMantenimientos(currentPage, REGISTROS_POR_PAGINA);
         
-        // Mapeo y traducción estricta de Backend a Frontend
         const reportesAdaptados: Report[] = response.data.map((item: any) => {
-          
-          // Aseguramos que la prioridad coincida con tus tipos
           const rawPriority = (item.prioridad || 'media').toUpperCase();
           const priorityVal: Priority = ['ALTA', 'MEDIA', 'BAJA'].includes(rawPriority) 
             ? rawPriority as Priority 
             : 'MEDIA';
 
-          // Aseguramos que el estado coincida con tus tipos
+          // eslint-disable-next-line prefer-const
           let rawStatus = (item.estado || '').toUpperCase();
           let statusVal: Status = 'PROGRAMADO';
           if (rawStatus === 'ASIGNADO' || rawStatus === 'EN PROCESO') statusVal = 'EN PROCESO';
@@ -68,11 +65,12 @@ export const ReportTable = () => {
     };
 
     fetchReportes();
-  }, [currentPage]);
+  }, [currentPage]); // Solo reacciona al cambio de página
 
   return (
     <div className="bg-transparent md:bg-white md:rounded-2xl md:border md:border-gray-100 md:shadow-sm md:overflow-hidden mt-8">
       
+      {/* CABECERA LIMPIA (Sin Buscador) */}
       <div className="p-4 md:p-6 md:border-b md:border-gray-50 mb-4 md:mb-0">
         <h2 className="font-bold text-gray-800 text-base md:text-lg">Mantenimientos prioritarios pendientes de ejecución</h2>
       </div>
@@ -80,7 +78,6 @@ export const ReportTable = () => {
       <div className="w-full overflow-x-auto pb-2 md:pb-0">
         <div className="space-y-4 md:space-y-0 md:divide-y md:divide-gray-50 md:min-w-[850px]">
           
-          {/* ESTADO DE CARGA Y VACÍO */}
           {cargando ? (
             <div className="p-12 text-center text-gray-400 font-medium">
               <div className="animate-pulse flex flex-col items-center">
@@ -93,7 +90,6 @@ export const ReportTable = () => {
               No hay mantenimientos prioritarios registrados.
             </div>
           ) : (
-            /* RENDERIZADO DE LA LISTA REAL */
             reportes.map((report) => (
               <div 
                 key={report.id} 
@@ -149,12 +145,10 @@ export const ReportTable = () => {
           </button>
         </div>
       )}
-
     </div>
   );
 };
 
-// Tus Badges se mantienen intactos (¡son geniales!)
 const PriorityBadge = ({ priority }: { priority: 'ALTA' | 'MEDIA' | 'BAJA' }) => {
   const colors: Record<string , string> = {
     ALTA: "bg-red-100 text-red-600",

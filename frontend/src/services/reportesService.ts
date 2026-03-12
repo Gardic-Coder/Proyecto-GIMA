@@ -12,13 +12,9 @@ export interface ReporteMantenimientos {
 
 // --- SERVICIO CON MANEJO DE ERRORES PARA EVITAR NETWORK ERROR ---
 export const reportesService = {
-  getMantenimientos: async (): Promise<ReporteMantenimientos[]> => {
-    try {
-      const response = await api.get('mantenimiento/reportes');
-      return response.data;
-    } catch (error) {
-      console.error("Error en reporte de mantenimientos (Probable saturación):", error);
-      return [];
+    async getMantenimientos(page: number = 1, perPage: number = 5) {
+        // Pasamos per_page a Laravel
+        const response = await api.get(`/mantenimiento/reportes?page=${page}&per_page=${perPage}`);
+        return response.data;
     }
-  },
 };
