@@ -1,29 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import {
-  Plus,
-  Wrench,
-  Clock,
-  CheckCircle,
-  X,
-  Search,
-  FileText,
-  Download,
-  CalendarDays,
-} from "lucide-react";
-import { mockTecnicos } from "@/utils/mockMantenimiento";
-import {
-  Orden as OrdenBase,
-  OrdenEstado,
-  TipoMantenimiento,
-  Prioridad,
-} from "@/types/mantenimiento";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import { useEffect, useState } from "react"
+import Link from "next/link"
+import { Plus, X, Search, FileText, Download, CalendarDays } from "lucide-react"
+import { mockTecnicos } from "@/utils/mockMantenimiento"
+import { Orden as OrdenBase, OrdenEstado, TipoMantenimiento, Prioridad } from '@/types/mantenimiento'
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import AuthGuard from "@/components/AuthGuard"
 import { mantenimientoService } from "@/services/mantenimientoService";
-
 
 // Interface extendida para campos personalizados
 interface Orden extends OrdenBase {
@@ -37,13 +22,6 @@ export default function Mantenimiento() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
-  const [stats, setStats] = useState({
-    pendientes: 0,
-    enProceso: 0,
-    completadas: 0,
-  });
-
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -92,10 +70,21 @@ export default function Mantenimiento() {
     const cargarDatos = async () => {
       setCargando(true);
       try {
-        const dataBackend = await mantenimientoService.getMantenimientos(currentPage);
+        const [dataBackend] = await Promise.all([
+          mantenimientoService.getMantenimientos(currentPage),
+        ]);
 
+        // setStats({
+        //   pendientes: dataStats.pendientes,
+        //   enProceso: dataStats.en_proceso,
+        //   completadas: dataStats.completadas,
+        // });
+
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const ordenesAdaptadas: Orden[] = dataBackend.data.map((item: any) => {
-          let estadoUI = "pendiente";
+          let estadoUI: "pendiente" | "en-proceso" | "completada" = "pendiente";
+
           if (item.estado === "en proceso") estadoUI = "en-proceso";
           if (item.estado === "completadas" || item.estado === "completado") estadoUI = "completada";
 
@@ -197,6 +186,7 @@ export default function Mantenimiento() {
       theme: "grid",
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const finalY = (doc as any).lastAutoTable.finalY + 35;
     doc.line(14, finalY, 80, finalY);
     doc.text("CARLOS MANTILLA", 14, finalY + 5);
@@ -309,28 +299,6 @@ export default function Mantenimiento() {
             <Plus size={18} /> Nueva Orden
           </button>
         </div>
-      </div>
-
-      {/* STATS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <StatCard
-          icon={<Clock className="text-orange-600" />}
-          label="Pendientes"
-          value={stats.pendientes.toString()}
-          color="bg-orange-100"
-        />
-        <StatCard
-          icon={<Wrench className="text-blue-600" />}
-          label="En Proceso"
-          value={stats.enProceso.toString()}
-          color="bg-blue-100"
-        />
-        <StatCard
-          icon={<CheckCircle className="text-green-600" />}
-          label="Completadas"
-          value={stats.completadas.toString()}
-          color="bg-green-100"
-        />
       </div>
 
       {/* TABLE */}
@@ -660,7 +628,7 @@ export default function Mantenimiento() {
 
       {/* MODAL DE VISTA PREVIA DEL INFORME (ESTILO IMAGEN) */}
       {isSuccessModalOpen && lastCreatedOrder && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 overflow-y-auto">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-60 p-4 overflow-y-auto">
           <div className="bg-white rounded-lg w-full max-w-4xl shadow-2xl my-8 animate-in fade-in zoom-in duration-300 overflow-hidden flex flex-col">
             {/* CABECERA AZUL DEL SISTEMA */}
             <div className="bg-[#004a7c] p-4 flex justify-between items-center text-white">
@@ -677,7 +645,7 @@ export default function Mantenimiento() {
 
             {/* CONTENIDO DEL INFORME (ESTILO HOJA PAPEL) */}
             <div className="p-8 bg-gray-50 flex-1 overflow-y-auto">
-              <div className="bg-white mx-auto shadow-lg border border-gray-200 p-10 max-w-[850px] min-h-[1000px] relative">
+              <div className="bg-white mx-auto shadow-lg border border-gray-200 p-10 max-w-212.5 min-h-250 relative">
                 {/* Header del Documento */}
                 <div className="flex justify-between items-start mb-8 border-b pb-6">
                   <div>
@@ -849,28 +817,6 @@ export default function Mantenimiento() {
         >
           <FileText size={18} /> GENERAR INFORME GENERAL
         </button>
-      </div>
-    </div>
-  );
-}
-
-function StatCard({
-  icon,
-  label,
-  value,
-  color,
-}: {
-  icon: any;
-  label: string;
-  value: string;
-  color: string;
-}) {
-  return (
-    <div className="bg-white p-4 rounded-xl shadow-sm border flex items-center gap-4 hover:shadow-md transition-shadow">
-      <div className={`p-3 ${color} rounded-lg`}>{icon}</div>
-      <div className="text-left">
-        <p className="text-sm text-gray-500">{label}</p>
-        <h3 className="text-2xl font-bold">{value}</h3>
       </div>
     </div>
   );
