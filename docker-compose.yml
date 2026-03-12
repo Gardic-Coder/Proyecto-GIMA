@@ -39,25 +39,5 @@ services:
     depends_on:
       - app
     
-  # Módulo de Inteligencia Artificial
-  ia:
-    build:
-      context: ./ia
-      dockerfile: Dockerfile
-    volumes:
-      - ./ia:/app
-      - /app/node_modules # Evita que los archivos locales sobrescriban las librerías del contenedor
-    ports:
-      # Asigna un puerto diferente (3001) en tu máquina para no chocar con el frontend
-      - "${PORT_IA:-3001}:3000"
-    environment:
-      - NEXT_PUBLIC_BACKEND_API_URL=http://app:8000
-    env_file:
-      - ./ia/.env # Usa el archivo .env configurado para la IA
-    depends_on:
-      - app
-
 volumes:
   postgres_data:
-
-

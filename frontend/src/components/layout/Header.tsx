@@ -1,22 +1,19 @@
 "use client"; 
 
-//import { useSidebar } from '@/components/ui/sidebarContext'; 
 import { useContext } from 'react';
-import { Search, Bell, CircleUser, Menu } from 'lucide-react';
+import { Bell, Menu, User } from 'lucide-react';
 import { sidebarContext } from '../ui/sidebarContext';
-
+import { useAuth } from "@/context/AuthContext";
 
 export default function Header() {
   
   const { toggleSidebar } = useContext(sidebarContext); 
-
-  // Ya no necesitamos el useAuth ni la lógica de roles aquí, 
-  // porque el componente interno de la página se encarga de eso.
+  const { user } = useAuth();
 
   return (
     <header className="h-20 bg-white/80 backdrop-blur-md flex items-center justify-between px-6 md:px-10 sticky top-0 z-40 border-b border-gray-100 transition-all">
       
-      {/* Izquierda: Botón Menú Móvil y Título */}
+      {/* Izquierda */}
       <div className="flex items-center gap-4">
         <button 
           onClick={toggleSidebar} 
@@ -31,25 +28,29 @@ export default function Header() {
         </h2>
       </div>
 
-      {/* Derecha: Buscador Global y Notificaciones */}
+      {/* Derecha */}
       <div className="flex items-center gap-4 md:gap-6">
-        
-        <div className="relative hidden md:block">
-          <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
-          <input 
-            className="bg-gray-50 pl-10 pr-4 py-2 rounded-xl outline-none w-64 text-sm border border-transparent focus:border-blue-400 transition-all" 
-            placeholder="Buscar en el sistema..." 
-          />
-        </div>
-        
-        <div className="flex gap-3 md:gap-4 text-gray-400 items-center">
-          <button className="p-2 hover:bg-gray-100 rounded-full transition-colors relative">
-             <Bell size={22} />
-             {/* Indicador de notificación activa */}
-             <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+
+        {/* Notificaciones */}
+        <button className="p-2 hover:bg-gray-100 rounded-full transition-colors relative text-gray-400">
+          <Bell size={22} />
+          <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+        </button>
+
+        {/* Perfil Usuario */}
+        <div className="flex items-center gap-3 border-l border-gray-200 pl-4">
+          <div className="text-right hidden md:block">
+            <p className="text-sm font-bold text-gray-900">
+              {user?.name || 'Cargando...'}
+            </p>
+            <p className="text-xs text-gray-500 capitalize">
+              {user?.roles_asignados?.[0] || 'Usuario'}
+            </p>
+          </div>
+
+          <button className="p-2.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-full transition border border-blue-100">
+            <User className="w-6 h-6" />
           </button>
-          
-          {/* EL BLOQUE DEL USUARIO FUE ELIMINADO DE AQUÍ */}
         </div>
 
       </div>
