@@ -22,6 +22,5 @@ export const mantenimientoService = {
 
         return response.data;
     },
-
 };
 

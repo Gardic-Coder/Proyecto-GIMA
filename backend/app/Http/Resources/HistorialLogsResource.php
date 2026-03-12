@@ -12,18 +12,18 @@ class HistorialLogsResource extends JsonResource
      * 
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
-    {
-        return [
-            'id' => $this->id,
-            'entidad' => $this->entidad,
-            'entidad_id' => $this->entidad_id,
-            'accion' => $this->accion,
-            'descripcion' => $this->descripcion,
-            'fecha' => $this->fecha->toDateTimeString(),
-            'usuario' => new UserResource($this->whenLoaded('usuario')),
-            'created_at' => $this->created_at->toDateTimeString(),
-            'updated_at' => $this->updated_at->toDateTimeString(),
-        ];
-    }
+   public function toArray(Request $request): array
+{
+    return [
+        'id'          => $this->id,
+        'entidad'     => $this->entidad,
+        'entidad_id'  => $this->entidad_id,
+        'accion'      => $this->accion,
+        'descripcion' => $this->descripcion,
+        'fecha'       => $this->fecha->toDateTimeString(),
+        'user'        => new UserResource($this->whenLoaded('user')), 
+        'created_at'  => $this->created_at->toDateTimeString(),
+        'updated_at'  => $this->updated_at->toDateTimeString(),
+    ];
+}
 }

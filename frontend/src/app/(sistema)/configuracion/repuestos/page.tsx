@@ -1,25 +1,99 @@
 "use client"
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FormularioRepuestos } from "./FormularioRepuestos";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
-import { Plus, ChevronLeft, Pencil, Trash2 } from "lucide-react";
+import { Plus, ChevronLeft, Pencil, Trash2, Loader2, Search } from "lucide-react";
 import Link from "next/link";
+import AuthGuard from "@/components/AuthGuard";
+import { useAuth } from "@/context/AuthContext";
+import { repuestosService } from "@/services/repuestoService";
+import Pagination from "@/components/ui/Paginacion";
+import DeleteAlert from "@/components/ui/DeleteAlerta";
 
 export default function RepuestosPage() {
-  // Estado para controlar la apertura del modal
+  const { user } = useAuth();
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [idToDelete, setIdToDelete] = useState<number | null>(null);
+  const [repuestoToEdit, setRepuestoToEdit] = useState<any>(null); 
 
-  // Arreglo de datos simulados (mock data)
-  const repuestos = [
-    { codigo: "LC-001", descripcion: "Memoria RAM 16GB DDR4", categoria: "Computo", ubicacion: "Almacen", stock: "15" },
-    { codigo: "LC-001", descripcion: "Memoria RAM 16GB DDR4", categoria: "Computo", ubicacion: "Almacen", stock: "15" },
-    { codigo: "LC-001", descripcion: "Memoria RAM 16GB DDR4", categoria: "Computo", ubicacion: "Almacen", stock: "15" },
-  ];
+  const [repuestos, setRepuestos] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [porPagina, setPorPagina] = useState(15);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    const fetchRepuestos = async () => {
+      if (!user?.token) return;
+      setIsLoading(true);
+      try {
+        const response = await repuestosService.getAll(user.token, currentPage, porPagina, searchTerm);
+        
+        const repuestosData = response.data?.data ? response.data.data : response.data;
+        setRepuestos(repuestosData || []);
+        
+        const ultimaPagina = response.meta?.last_page || response.last_page || response.data?.last_page || 1;
+        setTotalPages(ultimaPagina);
+      } catch (error) {
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      fetchRepuestos();
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [user?.token, currentPage, porPagina, refreshTrigger, searchTerm]);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); 
+  };
+
+  const handleDeleteClick = (id: number) => {
+    setIdToDelete(id);
+    setIsAlertOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!user?.token || !idToDelete) return;
+    setIsAlertOpen(false);
+    setIsLoading(true);
+
+    try {
+      await repuestosService.delete(user.token, idToDelete);
+      setRefreshTrigger(prev => prev + 1); 
+    } catch (error: any) {
+      console.error("Error al eliminar el repuesto:", error);
+      alert("No se pudo eliminar el repuesto.");
+    } finally {
+      setIsLoading(false);
+      setIdToDelete(null);
+    }
+  };
+
+  const handleCreateClick = () => {
+    setRepuestoToEdit(null); 
+    setIsModalOpen(true);
+  };
+
+  const handleEditClick = (repuesto: any) => {
+    setRepuestoToEdit(repuesto); 
+    setIsModalOpen(true);
+  };
 
   return (
-    // Contenedor principal
-    <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8">
-      <DashboardHeader />
+    <AuthGuard>
+      {/* Contenedor principal */}
+      <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8">
+        <DashboardHeader />
       <div className="w-full mx-auto">
 
         {/* BOTÓN VOLVER */}
@@ -66,7 +140,6 @@ export default function RepuestosPage() {
                   <span>Stock</span>
                   <span className="text-center">Acciones</span>
                 </div>
-
                 {/* CUERPO DE LA TABLA / CONTENEDOR DE TARJETAS */}
                 <div className="space-y-4 md:space-y-0 md:border-x md:border-b md:border-gray-100 md:rounded-b-[30px] md:overflow-hidden font-archivo">
                   {/* Iteración sobre el arreglo de repuestos */}
@@ -128,12 +201,27 @@ export default function RepuestosPage() {
               </div>
             </div>
           </div>
-        </div>
+        </div>    
+        <FormularioRepuestos 
+            isOpen={isModalOpen} 
+            repuestoToEdit={repuestoToEdit}
+            onClose={() => {
+                setIsModalOpen(false);
+                setRepuestoToEdit(null);
+                setRefreshTrigger(prev => prev + 1); 
+            }} 
+        />
+        
+        <DeleteAlert
+          isOpen={isAlertOpen}
+          onClose={() => setIsAlertOpen(false)}
+          onConfirm={confirmDelete}
+          title="¿Eliminar Repuesto?"
+          description="Esta acción no se puede deshacer y el repuesto será borrado del sistema."
+        />
 
       </div>
-      
-      {/* MODAL (Intacto) */}
-      <FormularioRepuestos isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-    </div>
+      </div>
+    </AuthGuard>
   );
 }
