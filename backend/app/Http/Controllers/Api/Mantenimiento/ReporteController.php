@@ -270,7 +270,7 @@ class ReporteController extends Controller
 
     public function verMisReportes(Request $request)
     {
-        $perPage = (int) $request->query('per_page', 10);
+        $perPage = (int) $request->query('per_page', 5);
         $direction = $request->query('direction', 'desc');
         $direction = in_array(strtolower($direction), ['asc', 'desc']) ? $direction : 'desc';
 
