@@ -248,6 +248,7 @@ export default function Mantenimiento() {
   );
 
   return (
+    <AuthGuard allowedRoles={["admin", "tecnico", "supervisor"]}>
     <div className="min-h-screen p-6 bg-gray-50/50 text-gray-800 font-sans">
       {/* HEADER */}
       <div className="flex justify-between items-center mb-6">
@@ -802,5 +803,6 @@ export default function Mantenimiento() {
         </button>
       </div>
     </div>
+    </AuthGuard>
   );
 }

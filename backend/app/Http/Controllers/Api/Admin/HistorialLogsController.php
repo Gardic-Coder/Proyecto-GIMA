@@ -45,19 +45,19 @@ class HistorialLogsController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request)
-    {
-        $logs = HistorialLogs::with('user')
-            ->when(
-                $request->fecha_inicio && $request->fecha_fin,
-                fn($q) => $q->rangoFechas($request->fecha_inicio, $request->fecha_fin)
-            )
-            ->when($request->accion, fn($q, $v) => $q->where('accion', $v))
-            ->when($request->rol, fn($q, $v) => $q->porRol($v))
-            ->recientes()
-            ->paginate(20);
+{
+    $logs = HistorialLogs::with(['user.roles']) 
+        ->when(
+            $request->fecha_inicio && $request->fecha_fin,
+            fn($q) => $q->rangoFechas($request->fecha_inicio, $request->fecha_fin)
+        )
+        ->when($request->accion, fn($q, $v) => $q->where('accion', $v))
+        ->when($request->rol, fn($q, $v) => $q->porRol($v))
+        ->recientes()
+        ->paginate(20);
 
-        return HistorialLogsResource::collection($logs);
-    }
+    return HistorialLogsResource::collection($logs);
+}
 
     /**
      * @OA\Post(
