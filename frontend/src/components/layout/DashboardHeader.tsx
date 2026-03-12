@@ -1,21 +1,15 @@
 "use client"
 
-import { User as UserIcon, Search, Bell } from "lucide-react"
+import { User, Search } from "lucide-react"
 import { usePathname } from "next/navigation"
-
-interface UserData {
-  name?: string;
-  roles_asignados?: string[];
-}
 
 interface DashboardHeaderProps {
   title?: string
   subtitle?: string
   showSearch?: boolean;
-  user?: UserData;
 }
 
-export function DashboardHeader({ title, subtitle = "Bienvenido al panel GIMA" , showSearch = true, user }: DashboardHeaderProps) {
+export function DashboardHeader({ title, subtitle = "Bienvenido al panel GIMA" , showSearch = true }: DashboardHeaderProps) {
 
   const pathname = usePathname()
 
@@ -49,24 +43,6 @@ export function DashboardHeader({ title, subtitle = "Bienvenido al panel GIMA" ,
           </div>
         )}
 
-          {/* Notifications */}
-          <button className="relative p-2 md:p-2.5 text-gray-600 hover:bg-gray-100 rounded-full transition">
-            <Bell className="w-5 h-5 md:w-6 md:h-6" />
-            <span className="absolute top-1 right-1 md:top-1.5 md:right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-          </button>
-
-          {/* Profile (AQUÍ ESTÁ LA CONEXIÓN CON LOS DATOS - INTACTA) */}
-          <div className="flex items-center gap-3 ml-1 md:ml-2 border-l border-gray-200 pl-3 md:pl-4">
-            <div className="text-right hidden md:block">
-              {/* Leemos "name" y "roles_asignados" de Laravel */}
-              <p className="text-sm font-bold text-gray-900">{user?.name || 'Cargando...'}</p>
-              <p className="text-xs text-gray-500 capitalize">{user?.roles_asignados?.[0] || 'Usuario'}</p>
-            </div>
-            <button className="p-2 md:p-2.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-full transition border border-blue-100">
-              <UserIcon className="w-5 h-5 md:w-6 md:h-6" />
-            </button>
-          </div>
-          
         </div>
       </div>
     </div>

@@ -63,55 +63,38 @@ export default function ConfiguracionPage() {
           />
         </div>
       </div>
-      </section>
 
       {/* Cards */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        <ConfigCard
-          title="Idioma y región"
-          desc="Zona horaria y formato de fecha"
-          icon={<LayoutDashboard size={20} />}
-          href="/configuracion/idiomas"
-        />
-        <ConfigCard
-          title="Gestión de usuarios"
-          desc="Roles y permisos"
-          icon={<User size={20} />}
-          href="/configuracion/User"
-        />
-        <ConfigCard
-          title="Historial de usuarios"
-          desc="Registros de actividad"
-          icon={<User size={20} />}
-          href="/configuracion/historial"
-        />
-        <ConfigCard
-          title="Ubicaciones"
-          desc="Gestionar ubicaciones"
-          icon={<Globe size={20} />}
-          href="/configuracion/ubicaciones"
-        />
-        <ConfigCard
-          title="Notificaciones"
-          desc="Alertas y correos"
-          icon={<Bell size={20} />}
-        />
-        <ConfigCard
-          title="Seguridad"
-          desc="Contraseñas y auditorías"
-          icon={<Settings size={20} />}
-        />
-        <ConfigCard
-          title="Gestión de repuestos"
-          desc="Materiales y herramientas"
-          icon={<Wrench size={20} />}
-          href="/configuracion/repuestos"
-        />
-        <ConfigCard
-          title="Gestión módulo IA"
-          desc="Configuración de IA"
-          icon={<Settings size={20} />}
-        />
+<div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-10xl">
+
+  <ConfigCard
+    title="Historial de usuarios"
+    desc="Registros de actividad"
+    icon={<User size={24} />}
+    href="/configuracion/historial"
+  />
+
+  <ConfigCard
+    title="Gestión de usuarios"
+    desc="Administrar accesos, roles y permisos del personal"
+   icon={<User size={24} className="text-blue-500" />}
+    href="/configuracion/User"
+  />
+
+  <ConfigCard
+    title="Ubicaciones"
+    desc="Gestionar ubicaciones"
+    icon={<Globe size={24} className="text-red-500" />}
+    href="/configuracion/ubicaciones"
+  />
+
+  <ConfigCard
+    title="Gestión de repuestos"
+    desc="Administrar materiales y herramientas"
+    icon={<Wrench size={24} className="text-gray-500" />}
+    href="/configuracion/repuestos"
+  />
+  </div> 
       </section>
     </AuthGuard>
   );
