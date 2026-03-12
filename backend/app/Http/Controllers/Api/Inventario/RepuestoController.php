@@ -29,10 +29,13 @@ use App\Http\Resources\RepuestoResource;
 
 class RepuestoController extends Controller
 {
-    public function index()
+   public function index(Request $request)
     {
-        $repuestos = Repuesto::with(['proveedor', 'direccion'])->get();
-        
+        $repuestos = Repuesto::with(['proveedor', 'direccion'])
+                            ->filtrar($request->all()) 
+                            ->latest()                 
+                            ->paginate($request->get('per_page', 15)); 
+
         return RepuestoResource::collection($repuestos);
     }
 

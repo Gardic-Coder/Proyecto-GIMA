@@ -54,12 +54,26 @@ function getActionStyle(action: string) {
 function formatLaravelDate(fechaString: string) {
   if (!fechaString) return { date: "N/A", hour: "N/A", timeAgo: "Desconocido" };
 
-  const dateObj = new Date(fechaString);
+  // 1. Forzamos a que JS entienda que es una fecha UTC (Universal) agregando la 'Z'
+  let safeDateString = fechaString;
+  if (!safeDateString.includes('T')) {
+    safeDateString = safeDateString.replace(' ', 'T');
+  }
+  if (!safeDateString.endsWith('Z')) {
+    safeDateString += 'Z';
+  }
+
+  const dateObj = new Date(safeDateString);
   const now = new Date();
   
+  // 2. Calculamos la diferencia
   const diffInSeconds = Math.floor((now.getTime() - dateObj.getTime()) / 1000);
+  
   let timeAgo = "";
-  if (diffInSeconds < 60) timeAgo = `Hace ${diffInSeconds} seg`;
+  
+  // 3. Evitamos números negativos por pequeños desfases de reloj
+  if (diffInSeconds < 0) timeAgo = "Justo ahora";
+  else if (diffInSeconds < 60) timeAgo = `Hace ${diffInSeconds} seg`;
   else if (diffInSeconds < 3600) timeAgo = `Hace ${Math.floor(diffInSeconds / 60)} min`;
   else if (diffInSeconds < 86400) timeAgo = `Hace ${Math.floor(diffInSeconds / 3600)} h`;
   else timeAgo = `Hace ${Math.floor(diffInSeconds / 86400)} días`;
@@ -71,12 +85,13 @@ function formatLaravelDate(fechaString: string) {
   };
 }
 
-// 3. TRADUCTOR DE RUTAS A MÓDULOS HUMANOS
+// 3. TRADUCTOR DE RUTAS A MÓDULOS HUMANOS (Actualizado)
 function humanizeAction(rawAction: string) {
   let text = rawAction.toUpperCase();
   
   text = text.replace('EN API/CATALOGO/ARTICULOS', 'EN CATEGORÍAS DE ACTIVOS');
-  text = text.replace('EN API/ADMIN/AUDITORIAS', 'EN HISTORIAL DE SISTEMA');
+  text = text.replace('EN API/ADMIN/HISTORIAL-LOGS', 'EN HISTORIAL DE SISTEMA'); // <-- Ruta actualizada
+  text = text.replace('EN API/INVENTARIO/REPUESTOS', 'EN GESTIÓN DE REPUESTOS'); // <-- Nuevo módulo agregado
   text = text.replace('EN API/AUTENTICACION/INICIAR-SESION', 'EN SISTEMA (LOGIN)');
   text = text.replace('EN API/AUTENTICACION/CERRAR-SESION', 'EN SISTEMA (LOGOUT)');
   text = text.replace(/\/(\d+)$/, ' (ID: $1)');
@@ -84,7 +99,7 @@ function humanizeAction(rawAction: string) {
   return text;
 }
 
-// 4. TRADUCTOR DE JSON A DESCRIPCIÓN NATURAL
+// 4. TRADUCTOR DE JSON A DESCRIPCIÓN NATURAL (Mejorado para Repuestos)
 function humanizeDescription(rawDescription: string, rawAction: string) {
   const isLogin = rawAction.includes('INICIAR-SESION');
   const isLogout = rawAction.includes('CERRAR-SESION');
@@ -101,10 +116,16 @@ function humanizeDescription(rawDescription: string, rawAction: string) {
       const parsed = JSON.parse(jsonPart);
       if (Object.keys(parsed).length > 0) {
         const details = [];
+        // Filtros genéricos
         if (parsed.search) details.push(`Buscó: "${parsed.search}"`);
         if (parsed.tipo) details.push(`Tipo: ${parsed.tipo.toUpperCase()}`);
         if (parsed.marca) details.push(`Marca: ${parsed.marca}`);
         if (parsed.modelo) details.push(`Modelo: ${parsed.modelo}`);
+        
+        // Filtros nuevos para los Repuestos
+        if (parsed.descripcion) details.push(`Nombre: ${parsed.descripcion}`);
+        if (parsed.codigo) details.push(`Código: ${parsed.codigo}`);
+        if (parsed.stock !== undefined) details.push(`Stock: ${parsed.stock}`);
         
         paramsText = details.length > 0 ? `Detalles: ${details.join(', ')}.` : "";
       }
@@ -139,17 +160,17 @@ export default function HistorialPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [porPagina, setPorPagina] = useState(20);
 
-  // 5. EFECTO PARA TRAER LA DATA REAL (Escucha página y cantidad)
+  // 5. EFECTO PARA TRAER LA DATA REAL
   useEffect(() => {
     const fetchHistorial = async () => {
       if (!user?.token) return;
       setIsLoading(true);
       try {
-        // Pasamos token, página y cantidad de registros por página
         const response = await historialService.getAll(user.token, currentPage, porPagina);
         
-        const logsArray = response.data || []; 
-        setTotalPages(response.last_page || 1);
+        // Ajustamos por si viene envuelto en 'data' por el Resource o directo
+        const logsArray = response.data || response || []; 
+        setTotalPages(response.meta?.last_page || response.last_page || 1);
         
         const formattedData: HistoryRecord[] = logsArray.map((item: any) => {
           const timeData = formatLaravelDate(item.fecha || item.created_at); 
