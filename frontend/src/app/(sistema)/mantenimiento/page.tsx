@@ -1,13 +1,29 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Plus, Wrench, Clock, CheckCircle, X, Search, FileText, Download, CalendarDays } from "lucide-react"
-import { mockTecnicos, mockOrdenes } from "@/utils/mockMantenimiento"
-import { Orden as OrdenBase, OrdenEstado, TipoMantenimiento, Prioridad } from '@/types/mantenimiento'
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import AuthGuard from "@/components/AuthGuard"
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import {
+  Plus,
+  Wrench,
+  Clock,
+  CheckCircle,
+  X,
+  Search,
+  FileText,
+  Download,
+  CalendarDays,
+} from "lucide-react";
+import { mockTecnicos } from "@/utils/mockMantenimiento";
+import {
+  Orden as OrdenBase,
+  OrdenEstado,
+  TipoMantenimiento,
+  Prioridad,
+} from "@/types/mantenimiento";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { mantenimientoService } from "@/services/mantenimientoService";
+
 
 // Interface extendida para campos personalizados
 interface Orden extends OrdenBase {
@@ -16,38 +32,108 @@ interface Orden extends OrdenBase {
 }
 
 export default function Mantenimiento() {
-  const [ordenes, setOrdenes] = useState<Orden[]>(mockOrdenes as Orden[]);
+  const [ordenes, setOrdenes] = useState<Orden[]>([]);
+  const [cargando, setCargando] = useState(true);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const [stats, setStats] = useState({
+    pendientes: 0,
+    enProceso: 0,
+    completadas: 0,
+  });
+
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   // ESTADOS PARA EL MODAL DE VISTA PREVIA DEL INFORME
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [lastCreatedOrder, setLastCreatedOrder] = useState<Orden | null>(null);
-  const [lastBudgetData, setLastBudgetData] = useState({ costo: '150.00', presupuestoDisponible: '5000.00', presupuestoUsado: '0.00', horaSugerida: '08:00' });
-
-  const [formData, setFormData] = useState({
-    activo: '',
-    tecnicoId: '',
-    prioridad: 'media' as Prioridad,
-    tipo: 'correctivo' as TipoMantenimiento,
-    fechaServicio: new Date().toISOString().split('T')[0],
-    horaSugerida: '08:00',
-    notas: '',
-    costo: '150.00',
-    presupuestoDisponible: '5000.00',
-    presupuestoUsado: '0.00',
-    estado: 'pendiente' as OrdenEstado
+  const [lastBudgetData, setLastBudgetData] = useState({
+    costo: "150.00",
+    presupuestoDisponible: "5000.00",
+    presupuestoUsado: "0.00",
+    horaSugerida: "08:00",
   });
 
-  const totalPendientes = ordenes.filter(o => o.estado === 'pendiente').length;
-  const totalEnProceso = ordenes.filter(o => o.estado === 'en-proceso').length;
-  const totalCompletadas = ordenes.filter(o => o.estado === 'completada').length;
+  const [formData, setFormData] = useState({
+    activo: "",
+    tecnicoId: "",
+    prioridad: "media" as Prioridad,
+    tipo: "correctivo" as TipoMantenimiento,
+    fechaServicio: new Date().toISOString().split("T")[0],
+    horaSugerida: "08:00",
+    notas: "",
+    costo: "150.00",
+    presupuestoDisponible: "5000.00",
+    presupuestoUsado: "0.00",
+    estado: "pendiente" as OrdenEstado,
+  });
+
+  // const totalPendientes = ordenes.filter(
+  //   (o) => o.estado === "pendiente",
+  // ).length;
+  // const totalEnProceso = ordenes.filter(
+  //   (o) => o.estado === "en-proceso",
+  // ).length;
+  // const totalCompletadas = ordenes.filter(
+  //   (o) => o.estado === "completada",
+  // ).length;
 
   const ordenesFiltradas = ordenes.filter((orden) => {
     const nombreTecnico = orden.tecnicoNombre.toLowerCase();
     const busqueda = searchTerm.toLowerCase();
     return nombreTecnico.includes(busqueda);
   });
+
+  useEffect(() => {
+    const cargarDatos = async () => {
+      setCargando(true);
+      try {
+        const dataBackend = await mantenimientoService.getMantenimientos(currentPage);
+
+        const ordenesAdaptadas: Orden[] = dataBackend.data.map((item: any) => {
+          let estadoUI = "pendiente";
+          if (item.estado === "en proceso") estadoUI = "en-proceso";
+          if (item.estado === "completadas" || item.estado === "completado") estadoUI = "completada";
+
+          return {
+
+          id: `ORD-${item.id}`, // Le damos formato de orden visualmente
+
+          activo:
+            item.activo?.nombre ||
+            item.activo?.titulo ||
+            `Activo #${item.activo_id}`,
+
+          tecnicoId: item.tecnico_id?.toString() || "",
+
+          // Si Laravel manda al usuario anidado, lo buscamos en item.tecnico.name
+          tecnicoNombre:
+            item.tecnico?.name || item.tecnico_nombre || "Técnico no asignado",
+
+          prioridad: item.prioridad || "media",
+          estado: estadoUI,
+          tipo: item.tipo || "preventivo",
+          fecha: item.fecha_programada || "Sin fecha",
+          notas: item.notas || "Sin notas adicionales",
+          fechaCulminacion: "",
+          }
+        });
+
+        setOrdenes(ordenesAdaptadas);
+        setTotalPages(dataBackend.last_page);
+      } catch (error) {
+        console.error("Error al cargar mantenimientos:", error);
+      } finally {
+        setCargando(false);
+      }
+    };
+
+    cargarDatos();
+  }, [currentPage]);
 
   const generarInformeIndividual = (datos: Orden) => {
     const doc = new jsPDF();
@@ -58,16 +144,26 @@ export default function Mantenimiento() {
     autoTable(doc, {
       startY: 30,
       body: [
-        ['Nombre del equipo:', datos.activo, 'Tipo de servicio:', datos.tipo?.toUpperCase() || 'N/A'],
-        ['Código de inventario:', datos.id, 'Prioridad:', datos.prioridad.toUpperCase()],
+        [
+          "Nombre del equipo:",
+          datos.activo,
+          "Tipo de servicio:",
+          datos.tipo?.toUpperCase() || "N/A",
+        ],
+        [
+          "Código de inventario:",
+          datos.id,
+          "Prioridad:",
+          datos.prioridad.toUpperCase(),
+        ],
       ],
-      theme: 'plain',
+      theme: "plain",
       styles: { fontSize: 10, cellPadding: 2 },
-      columnStyles: { 0: { fontStyle: 'bold' }, 2: { fontStyle: 'bold' } }
+      columnStyles: { 0: { fontStyle: "bold" }, 2: { fontStyle: "bold" } },
     });
 
     doc.setFillColor(37, 99, 235);
-    doc.rect(14, 50, 182, 8, 'F');
+    doc.rect(14, 50, 182, 8, "F");
     doc.setTextColor(255);
     doc.setFontSize(10);
     doc.text("RESUMEN DE ACTIVIDADES REALIZADAS", 18, 55);
@@ -80,16 +176,25 @@ export default function Mantenimiento() {
 
     autoTable(doc, {
       startY: 95,
-      head: [['REGISTRO CRONOLÓGICO', 'RESUMEN ECONÓMICO']],
+      head: [["REGISTRO CRONOLÓGICO", "RESUMEN ECONÓMICO"]],
       body: [
-        [`Apertura: ${datos.fecha} ${lastBudgetData.horaSugerida}`, `Presupuesto Disponible: $${lastBudgetData.presupuestoDisponible}`],
-        [`Estado: ${datos.estado.toUpperCase()}`, `Presupuesto Usado: $${lastBudgetData.presupuestoUsado}`],
+        [
+          `Apertura: ${datos.fecha} ${lastBudgetData.horaSugerida}`,
+          `Presupuesto Disponible: $${lastBudgetData.presupuestoDisponible}`,
+        ],
+        [
+          `Estado: ${datos.estado.toUpperCase()}`,
+          `Presupuesto Usado: $${lastBudgetData.presupuestoUsado}`,
+        ],
         [``, `Costo Estimado: $${lastBudgetData.costo}`],
-        [``, `Saldo Restante: $${(parseFloat(lastBudgetData.presupuestoDisponible) - parseFloat(lastBudgetData.presupuestoUsado) - parseFloat(lastBudgetData.costo)).toFixed(2)}`],
+        [
+          ``,
+          `Saldo Restante: $${(parseFloat(lastBudgetData.presupuestoDisponible) - parseFloat(lastBudgetData.presupuestoUsado) - parseFloat(lastBudgetData.costo)).toFixed(2)}`,
+        ],
         [``, `Moneda: USD`],
       ],
       headStyles: { fillColor: [37, 99, 235] },
-      theme: 'grid'
+      theme: "grid",
     });
 
     const finalY = (doc as any).lastAutoTable.finalY + 35;
@@ -101,7 +206,7 @@ export default function Mantenimiento() {
     doc.text("ROBERTO GOMEZ", 120, finalY + 5);
     doc.text("Supervisor de Planta", 120, finalY + 10);
 
-    doc.save(`Informe_${datos.activo.replace(/\s+/g, '_')}.pdf`);
+    doc.save(`Informe_${datos.activo.replace(/\s+/g, "_")}.pdf`);
   };
 
   const exportarInformePDF = () => {
@@ -109,49 +214,67 @@ export default function Mantenimiento() {
     doc.text("INFORME GENERAL GIMA", 14, 22);
     autoTable(doc, {
       startY: 40,
-      head: [['ID', 'ACTIVO', 'TÉCNICO', 'PRIORIDAD', 'ESTADO']],
-      body: ordenesFiltradas.map(o => [o.id, o.activo, o.tecnicoNombre, o.prioridad, o.estado]),
-      headStyles: { fillColor: [37, 99, 235] }
+      head: [["ID", "ACTIVO", "TÉCNICO", "PRIORIDAD", "ESTADO"]],
+      body: ordenesFiltradas.map((o) => [
+        o.id,
+        o.activo,
+        o.tecnicoNombre,
+        o.prioridad,
+        o.estado,
+      ]),
+      headStyles: { fillColor: [37, 99, 235] },
     });
     doc.save("GIMA_Reporte_General.pdf");
   };
 
   const handleCrearOrden = (e: React.FormEvent) => {
     e.preventDefault();
-    const tecnico = mockTecnicos.find(t => t.id === formData.tecnicoId);
-    
+    const tecnico = mockTecnicos.find((t) => t.id === formData.tecnicoId);
+
     const nuevaOrden: Orden = {
       id: `ORD-${Math.floor(Math.random() * 1000)}`,
       activo: formData.activo,
       tecnicoId: formData.tecnicoId,
-      tecnicoNombre: tecnico ? tecnico.name : 'Sin asignar',
+      tecnicoNombre: tecnico ? tecnico.name : "Sin asignar",
       prioridad: formData.prioridad,
       estado: formData.estado,
       tipo: formData.tipo,
       fecha: formData.fechaServicio,
-      notas: formData.notas, 
-      fechaCulminacion: ''
+      notas: formData.notas,
+      fechaCulminacion: "",
     };
 
     setOrdenes([nuevaOrden, ...ordenes]);
     setLastCreatedOrder(nuevaOrden);
-    setLastBudgetData({ costo: formData.costo, presupuestoDisponible: formData.presupuestoDisponible, presupuestoUsado: formData.presupuestoUsado, horaSugerida: formData.horaSugerida });
+    setLastBudgetData({
+      costo: formData.costo,
+      presupuestoDisponible: formData.presupuestoDisponible,
+      presupuestoUsado: formData.presupuestoUsado,
+      horaSugerida: formData.horaSugerida,
+    });
     setIsModalOpen(false);
     setIsSuccessModalOpen(true);
 
-    setFormData({ 
-      activo: '', tecnicoId: '', prioridad: 'media', tipo: 'correctivo', 
-      fechaServicio: new Date().toISOString().split('T')[0], horaSugerida: '08:00', 
-      notas: '', costo: '150.00', presupuestoDisponible: '5000.00', presupuestoUsado: '0.00', estado: 'pendiente' 
+    setFormData({
+      activo: "",
+      tecnicoId: "",
+      prioridad: "media",
+      tipo: "correctivo",
+      fechaServicio: new Date().toISOString().split("T")[0],
+      horaSugerida: "08:00",
+      notas: "",
+      costo: "150.00",
+      presupuestoDisponible: "5000.00",
+      presupuestoUsado: "0.00",
+      estado: "pendiente",
     });
   };
 
-  const tecnicos = mockTecnicos.filter(user => user.rol?.toLowerCase() === 'tecnico');
+  const tecnicos = mockTecnicos.filter(
+    (user) => user.rol?.toLowerCase() === "tecnico",
+  );
 
   return (
-
-    <AuthGuard roleRequired={["admin", "supervisor", "tecnico"]}>
-
     <div className="min-h-screen p-6 bg-gray-50/50 text-gray-800 font-sans">
       {/* HEADER */}
       <div className="flex justify-between items-center mb-6">
@@ -161,10 +284,13 @@ export default function Mantenimiento() {
         </div>
         <div className="flex items-center gap-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Buscar técnico..." 
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              size={18}
+            />
+            <input
+              type="text"
+              placeholder="Buscar técnico..."
               className="pl-10 pr-4 py-2 border rounded-full bg-white outline-none focus:ring-2 focus:ring-blue-500 transition-all w-64"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -176,7 +302,7 @@ export default function Mantenimiento() {
           >
             <CalendarDays size={18} /> Calendario
           </Link>
-          <button 
+          <button
             onClick={() => setIsModalOpen(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2"
           >
@@ -187,9 +313,24 @@ export default function Mantenimiento() {
 
       {/* STATS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <StatCard icon={<Clock className="text-orange-600" />} label="Pendientes" value={totalPendientes.toString()} color="bg-orange-100" />
-        <StatCard icon={<Wrench className="text-blue-600" />} label="En Proceso" value={totalEnProceso.toString()} color="bg-blue-100" />
-        <StatCard icon={<CheckCircle className="text-green-600" />} label="Completadas" value={totalCompletadas.toString()} color="bg-green-100" />
+        <StatCard
+          icon={<Clock className="text-orange-600" />}
+          label="Pendientes"
+          value={stats.pendientes.toString()}
+          color="bg-orange-100"
+        />
+        <StatCard
+          icon={<Wrench className="text-blue-600" />}
+          label="En Proceso"
+          value={stats.enProceso.toString()}
+          color="bg-blue-100"
+        />
+        <StatCard
+          icon={<CheckCircle className="text-green-600" />}
+          label="Completadas"
+          value={stats.completadas.toString()}
+          color="bg-green-100"
+        />
       </div>
 
       {/* TABLE */}
@@ -204,26 +345,75 @@ export default function Mantenimiento() {
               <th className="p-4 text-right">Acciones</th>
             </tr>
           </thead>
+
           <tbody className="divide-y">
-            {ordenesFiltradas.map((orden) => (
-              <tr key={orden.id} className="hover:bg-gray-50">
-                <td className="p-4 text-xs font-mono">{orden.id}</td>
-                <td className="p-4 font-bold">{orden.activo}</td>
-                <td className="p-4">{orden.tecnicoNombre}</td>
-                <td className="p-4">
-                  <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
-                    orden.prioridad === 'alta' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
-                  }`}>
-                    {orden.prioridad}
-                  </span>
-                </td>
-                <td className="p-4 text-right">
-                  <button onClick={() => setOrdenes(ordenes.filter(o => o.id !== orden.id))} className="text-red-400 font-bold text-sm hover:text-red-600">Eliminar</button>
+            {cargando ? (
+              <tr>
+                <td colSpan={5} className="p-4 text-center text-gray-500">
+                  Cargando mantenimientos...
                 </td>
               </tr>
-            ))}
+            ) : ordenesFiltradas.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="p-4 text-center text-gray-500">
+                  No hay mantenimientos para mostrar.
+                </td>
+              </tr>
+            ) : (
+              ordenesFiltradas.map((orden) => (
+                <tr key={orden.id} className="hover:bg-gray-50">
+                  <td className="p-4 text-xs font-mono">{orden.id}</td>
+                  <td className="p-4 font-bold">{orden.activo}</td>
+                  <td className="p-4">{orden.tecnicoNombre}</td>
+                  <td className="p-4">
+                    <span
+                      className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
+                        orden.prioridad === "alta"
+                          ? "bg-red-100 text-red-600"
+                          : "bg-blue-100 text-blue-600"
+                      }`}
+                    >
+                      {orden.prioridad}
+                    </span>
+                  </td>
+                  <td className="p-4 text-right">
+                    <button
+                      onClick={() =>
+                        setOrdenes(ordenes.filter((o) => o.id !== orden.id))
+                      }
+                      className="text-red-400 font-bold text-sm hover:text-red-600"
+                    >
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
+      </div>
+
+      {/* PAGINATION */}
+      <div className="flex justify-between items-center p-4 bg-white border border-t-0 rounded-b-xl shadow-sm mb-8">
+        <button
+          className="px-4 py-2 text-sm font-bold text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+          disabled={currentPage === 1 || cargando}
+        >
+          Anterior
+        </button>
+
+        <span className="text-sm text-gray-500 font-medium">
+          Página {currentPage} de {totalPages}
+        </span>
+
+        <button
+          className="px-4 py-2 text-sm font-bold text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+          disabled={currentPage === totalPages}
+        >
+          Siguiente
+        </button>
       </div>
 
       {/* MODAL PRINCIPAL */}
@@ -233,48 +423,113 @@ export default function Mantenimiento() {
             <div className="bg-white p-6 flex justify-between items-center border-b">
               <div>
                 <h2 className="text-xl font-bold uppercase">Nueva Orden</h2>
-                <p className="text-[10px] text-gray-400">Agendar servicio en mantenimiento</p>
+                <p className="text-[10px] text-gray-400">
+                  Agendar servicio en mantenimiento
+                </p>
               </div>
-              <X className="cursor-pointer text-gray-400 hover:text-red-500" onClick={() => setIsModalOpen(false)} />
+              <X
+                className="cursor-pointer text-gray-400 hover:text-red-500"
+                onClick={() => setIsModalOpen(false)}
+              />
             </div>
 
-            <form onSubmit={handleCrearOrden} className="p-6 space-y-4 text-left">
+            <form
+              onSubmit={handleCrearOrden}
+              className="p-6 space-y-4 text-left"
+            >
               <div>
-                <label className="text-[10px] font-bold text-gray-400 uppercase">Información</label>
-                <select 
+                <label className="text-[10px] font-bold text-gray-400 uppercase">
+                  Información
+                </label>
+                <select
                   className="w-full p-2.5 border rounded-lg bg-gray-50 text-sm outline-none mt-1"
                   value={formData.activo}
-                  onChange={(e) => setFormData({...formData, activo: e.target.value})} required
+                  onChange={(e) =>
+                    setFormData({ ...formData, activo: e.target.value })
+                  }
+                  required
                 >
                   <option value="">Seleccionar Activo...</option>
                   <option value="Servidor Central">Servidor Central</option>
-                  <option value="Compresor Industrial">Compresor Industrial</option>
+                  <option value="Compresor Industrial">
+                    Compresor Industrial
+                  </option>
                   <option value="Sistema de Aire">Sistema de Aire</option>
                 </select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] font-bold text-gray-400 uppercase">Fecha</label>
-                  <input type="date" className="w-full p-2.5 border rounded-lg bg-gray-50 text-sm mt-1" value={formData.fechaServicio} onChange={(e) => setFormData({...formData, fechaServicio: e.target.value})} />
+                  <label className="text-[10px] font-bold text-gray-400 uppercase">
+                    Fecha
+                  </label>
+                  <input
+                    type="date"
+                    className="w-full p-2.5 border rounded-lg bg-gray-50 text-sm mt-1"
+                    value={formData.fechaServicio}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        fechaServicio: e.target.value,
+                      })
+                    }
+                  />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-gray-400 uppercase">Hora</label>
-                  <input type="time" className="w-full p-2.5 border rounded-lg bg-gray-50 text-sm mt-1" value={formData.horaSugerida} onChange={(e) => setFormData({...formData, horaSugerida: e.target.value})} />
+                  <label className="text-[10px] font-bold text-gray-400 uppercase">
+                    Hora
+                  </label>
+                  <input
+                    type="time"
+                    className="w-full p-2.5 border rounded-lg bg-gray-50 text-sm mt-1"
+                    value={formData.horaSugerida}
+                    onChange={(e) =>
+                      setFormData({ ...formData, horaSugerida: e.target.value })
+                    }
+                  />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] font-bold text-gray-400 uppercase">Tipo</label>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase">
+                    Tipo
+                  </label>
                   <div className="flex border rounded-lg overflow-hidden mt-1 h-10">
-                    <button type="button" onClick={() => setFormData({...formData, tipo: 'correctivo'})} className={`flex-1 text-[10px] font-bold uppercase ${formData.tipo === 'correctivo' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'}`}>Correctivo</button>
-                    <button type="button" onClick={() => setFormData({...formData, tipo: 'preventivo'})} className={`flex-1 text-[10px] font-bold uppercase ${formData.tipo === 'preventivo' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'}`}>Preventivo</button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData({ ...formData, tipo: "correctivo" })
+                      }
+                      className={`flex-1 text-[10px] font-bold uppercase ${formData.tipo === "correctivo" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-400"}`}
+                    >
+                      Correctivo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData({ ...formData, tipo: "preventivo" })
+                      }
+                      className={`flex-1 text-[10px] font-bold uppercase ${formData.tipo === "preventivo" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-400"}`}
+                    >
+                      Preventivo
+                    </button>
                   </div>
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-gray-400 uppercase">Prioridad</label>
-                  <select className="w-full h-10 px-2 border rounded-lg bg-gray-50 text-sm mt-1" value={formData.prioridad} onChange={(e) => setFormData({...formData, prioridad: e.target.value as Prioridad})}>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase">
+                    Prioridad
+                  </label>
+                  <select
+                    className="w-full h-10 px-2 border rounded-lg bg-gray-50 text-sm mt-1"
+                    value={formData.prioridad}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        prioridad: e.target.value as Prioridad,
+                      })
+                    }
+                  >
                     <option value="baja">Baja</option>
                     <option value="media">Media</option>
                     <option value="alta">Alta</option>
@@ -283,42 +538,120 @@ export default function Mantenimiento() {
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-gray-400 uppercase">Técnico</label>
-                <select className="w-full p-2.5 border rounded-lg bg-gray-50 text-sm mt-1" value={formData.tecnicoId} onChange={(e) => setFormData({...formData, tecnicoId: e.target.value})} required>
+                <label className="text-[10px] font-bold text-gray-400 uppercase">
+                  Técnico
+                </label>
+                <select
+                  className="w-full p-2.5 border rounded-lg bg-gray-50 text-sm mt-1"
+                  value={formData.tecnicoId}
+                  onChange={(e) =>
+                    setFormData({ ...formData, tecnicoId: e.target.value })
+                  }
+                  required
+                >
                   <option value="">Seleccionar Técnico...</option>
-                  {tecnicos.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                  {tecnicos.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-gray-400 uppercase">Presupuesto</label>
+                <label className="text-[10px] font-bold text-gray-400 uppercase">
+                  Presupuesto
+                </label>
                 <div className="grid grid-cols-3 gap-3 mt-1">
                   <div>
-                    <label className="text-[9px] text-gray-400">Disponible ($)</label>
-                    <input type="number" step="0.01" min="0" className="w-full p-2.5 border rounded-lg bg-gray-50 text-sm" value={formData.presupuestoDisponible} onChange={(e) => setFormData({...formData, presupuestoDisponible: e.target.value})} />
+                    <label className="text-[9px] text-gray-400">
+                      Disponible ($)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      className="w-full p-2.5 border rounded-lg bg-gray-50 text-sm"
+                      value={formData.presupuestoDisponible}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          presupuestoDisponible: e.target.value,
+                        })
+                      }
+                    />
                   </div>
                   <div>
-                    <label className="text-[9px] text-gray-400">Usado ($)</label>
-                    <input type="number" step="0.01" min="0" className="w-full p-2.5 border rounded-lg bg-gray-50 text-sm" value={formData.presupuestoUsado} onChange={(e) => setFormData({...formData, presupuestoUsado: e.target.value})} />
+                    <label className="text-[9px] text-gray-400">
+                      Usado ($)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      className="w-full p-2.5 border rounded-lg bg-gray-50 text-sm"
+                      value={formData.presupuestoUsado}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          presupuestoUsado: e.target.value,
+                        })
+                      }
+                    />
                   </div>
                   <div>
-                    <label className="text-[9px] text-gray-400">Costo estimado ($)</label>
-                    <input type="number" step="0.01" min="0" className="w-full p-2.5 border rounded-lg bg-gray-50 text-sm" value={formData.costo} onChange={(e) => setFormData({...formData, costo: e.target.value})} />
+                    <label className="text-[9px] text-gray-400">
+                      Costo estimado ($)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      className="w-full p-2.5 border rounded-lg bg-gray-50 text-sm"
+                      value={formData.costo}
+                      onChange={(e) =>
+                        setFormData({ ...formData, costo: e.target.value })
+                      }
+                    />
                   </div>
                 </div>
-                {parseFloat(formData.presupuestoUsado) + parseFloat(formData.costo) > parseFloat(formData.presupuestoDisponible) && (
-                  <p className="text-[10px] text-red-500 mt-1 font-medium">⚠ El costo usado + estimado supera el presupuesto disponible</p>
+                {parseFloat(formData.presupuestoUsado) +
+                  parseFloat(formData.costo) >
+                  parseFloat(formData.presupuestoDisponible) && (
+                  <p className="text-[10px] text-red-500 mt-1 font-medium">
+                    ⚠ El costo usado + estimado supera el presupuesto disponible
+                  </p>
                 )}
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-gray-400 uppercase">Notas</label>
-                <textarea rows={3} className="w-full p-3 border rounded-lg bg-gray-50 text-sm resize-none mt-1" value={formData.notas} onChange={(e) => setFormData({...formData, notas: e.target.value})} />
+                <label className="text-[10px] font-bold text-gray-400 uppercase">
+                  Notas
+                </label>
+                <textarea
+                  rows={3}
+                  className="w-full p-3 border rounded-lg bg-gray-50 text-sm resize-none mt-1"
+                  value={formData.notas}
+                  onChange={(e) =>
+                    setFormData({ ...formData, notas: e.target.value })
+                  }
+                />
               </div>
 
               <div className="flex gap-4 pt-4 border-t">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-2.5 bg-gray-100 text-gray-600 rounded-lg font-bold uppercase text-xs">Cancelar</button>
-                <button type="submit" className="flex-1 py-2.5 bg-blue-600 text-white rounded-lg font-bold uppercase text-xs">Agendar</button>
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 py-2.5 bg-gray-100 text-gray-600 rounded-lg font-bold uppercase text-xs"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 bg-blue-600 text-white rounded-lg font-bold uppercase text-xs"
+                >
+                  Agendar
+                </button>
               </div>
             </form>
           </div>
@@ -329,11 +662,15 @@ export default function Mantenimiento() {
       {isSuccessModalOpen && lastCreatedOrder && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 overflow-y-auto">
           <div className="bg-white rounded-lg w-full max-w-4xl shadow-2xl my-8 animate-in fade-in zoom-in duration-300 overflow-hidden flex flex-col">
-            
             {/* CABECERA AZUL DEL SISTEMA */}
             <div className="bg-[#004a7c] p-4 flex justify-between items-center text-white">
-              <h2 className="text-sm font-bold uppercase tracking-wider">Informe de Mantenimiento</h2>
-              <button onClick={() => setIsSuccessModalOpen(false)} className="hover:bg-white/10 p-1 rounded transition-colors">
+              <h2 className="text-sm font-bold uppercase tracking-wider">
+                Informe de Mantenimiento
+              </h2>
+              <button
+                onClick={() => setIsSuccessModalOpen(false)}
+                className="hover:bg-white/10 p-1 rounded transition-colors"
+              >
                 <X size={20} />
               </button>
             </div>
@@ -341,12 +678,15 @@ export default function Mantenimiento() {
             {/* CONTENIDO DEL INFORME (ESTILO HOJA PAPEL) */}
             <div className="p-8 bg-gray-50 flex-1 overflow-y-auto">
               <div className="bg-white mx-auto shadow-lg border border-gray-200 p-10 max-w-[850px] min-h-[1000px] relative">
-                
                 {/* Header del Documento */}
                 <div className="flex justify-between items-start mb-8 border-b pb-6">
                   <div>
-                    <h1 className="text-xl font-bold text-gray-800 uppercase tracking-tight">Informe de Mantenimiento</h1>
-                    <p className="text-xs text-gray-500 mt-1">Caton #: orden #: {lastCreatedOrder.id}</p>
+                    <h1 className="text-xl font-bold text-gray-800 uppercase tracking-tight">
+                      Informe de Mantenimiento
+                    </h1>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Caton #: orden #: {lastCreatedOrder.id}
+                    </p>
                   </div>
                   <div className="w-16 h-16 bg-blue-900 flex items-center justify-center rounded">
                     <span className="text-white font-black text-2xl">A</span>
@@ -357,11 +697,15 @@ export default function Mantenimiento() {
                 <div className="grid grid-cols-2 gap-x-12 gap-y-6 mb-10 text-sm">
                   <div className="flex justify-between border-b border-gray-100 pb-2">
                     <span className="text-gray-500">Nombre del equipo:</span>
-                    <span className="font-bold text-gray-800">{lastCreatedOrder.activo.toUpperCase()}</span>
+                    <span className="font-bold text-gray-800">
+                      {lastCreatedOrder.activo.toUpperCase()}
+                    </span>
                   </div>
                   <div className="flex justify-between border-b border-gray-100 pb-2">
                     <span className="text-gray-500">Tipo de servicio:</span>
-                    <span className="font-bold text-gray-800">{lastCreatedOrder.tipo.toUpperCase()}</span>
+                    <span className="font-bold text-gray-800">
+                      {lastCreatedOrder.tipo.toUpperCase()}
+                    </span>
                   </div>
                   <div className="flex justify-between border-b border-gray-100 pb-2">
                     <span className="text-gray-500">Código de inventario:</span>
@@ -378,8 +722,9 @@ export default function Mantenimiento() {
                   <div className="bg-[#006699] text-white px-4 py-1.5 text-[11px] font-bold uppercase mb-2 tracking-wide">
                     Resumen de actividades realizadas
                   </div>
-                  <div className="border border-gray-200 p-5 rounded-sm min-h-[120px] text-gray-700 text-sm leading-relaxed">
-                    {lastCreatedOrder.notas || "Mantenimiento preventivo programado para asegurar el correcto funcionamiento del activo. Limpieza interna y revisión de componentes críticos."}
+                  <div className="border border-gray-200 p-5 rounded-sm min-h-30 text-gray-700 text-sm leading-relaxed">
+                    {lastCreatedOrder.notas ||
+                      "Mantenimiento preventivo programado para asegurar el correcto funcionamiento del activo. Limpieza interna y revisión de componentes críticos."}
                   </div>
                 </div>
 
@@ -392,7 +737,9 @@ export default function Mantenimiento() {
                     <div className="border border-gray-200 p-4 text-sm space-y-3">
                       <div className="flex justify-between text-gray-600">
                         <span>APERTURA DE ORDEN:</span>
-                        <span className="font-bold text-gray-800">{lastCreatedOrder.fecha} 08:30</span>
+                        <span className="font-bold text-gray-800">
+                          {lastCreatedOrder.fecha} 08:30
+                        </span>
                       </div>
                       <div className="flex justify-between text-gray-600">
                         <span>CIERRE DE ORDEN:</span>
@@ -407,20 +754,33 @@ export default function Mantenimiento() {
                     <div className="border border-gray-200 p-4 text-sm space-y-3">
                       <div className="flex justify-between text-gray-600">
                         <span>Presupuesto Disponible:</span>
-                        <span className="font-bold text-gray-800">${lastBudgetData.presupuestoDisponible}</span>
+                        <span className="font-bold text-gray-800">
+                          ${lastBudgetData.presupuestoDisponible}
+                        </span>
                       </div>
                       <div className="flex justify-between text-gray-600">
                         <span>Presupuesto Usado:</span>
-                        <span className="font-bold text-gray-800">${lastBudgetData.presupuestoUsado}</span>
+                        <span className="font-bold text-gray-800">
+                          ${lastBudgetData.presupuestoUsado}
+                        </span>
                       </div>
                       <div className="flex justify-between text-gray-600 items-baseline border-t border-gray-100 pt-2">
                         <span>Costo Estimado intervención:</span>
-                        <span className="font-bold text-lg text-blue-900">${lastBudgetData.costo}</span>
+                        <span className="font-bold text-lg text-blue-900">
+                          ${lastBudgetData.costo}
+                        </span>
                       </div>
                       <div className="flex justify-between text-gray-600 items-baseline border-t border-gray-100 pt-2">
                         <span>Saldo Restante:</span>
-                        <span className={`font-bold text-lg ${(parseFloat(lastBudgetData.presupuestoDisponible) - parseFloat(lastBudgetData.presupuestoUsado) - parseFloat(lastBudgetData.costo)) < 0 ? 'text-red-600' : 'text-green-700'}`}>
-                          ${(parseFloat(lastBudgetData.presupuestoDisponible) - parseFloat(lastBudgetData.presupuestoUsado) - parseFloat(lastBudgetData.costo)).toFixed(2)}
+                        <span
+                          className={`font-bold text-lg ${parseFloat(lastBudgetData.presupuestoDisponible) - parseFloat(lastBudgetData.presupuestoUsado) - parseFloat(lastBudgetData.costo) < 0 ? "text-red-600" : "text-green-700"}`}
+                        >
+                          $
+                          {(
+                            parseFloat(lastBudgetData.presupuestoDisponible) -
+                            parseFloat(lastBudgetData.presupuestoUsado) -
+                            parseFloat(lastBudgetData.costo)
+                          ).toFixed(2)}
                         </span>
                       </div>
                       <div className="flex justify-between text-gray-500 text-[10px]">
@@ -434,28 +794,35 @@ export default function Mantenimiento() {
                 {/* Firmas */}
                 <div className="flex justify-around items-end pt-12">
                   <div className="text-center w-48">
-                    <div className="border-t border-gray-400 pt-2 font-bold text-sm text-gray-800 uppercase">Carlos Mantilla</div>
-                    <div className="text-xs text-gray-500">Técnico Principal</div>
+                    <div className="border-t border-gray-400 pt-2 font-bold text-sm text-gray-800 uppercase">
+                      Carlos Mantilla
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Técnico Principal
+                    </div>
                   </div>
                   <div className="text-center w-48">
-                    <div className="border-t border-gray-400 pt-2 font-bold text-sm text-gray-800 uppercase">Roberto Gomez</div>
-                    <div className="text-xs text-gray-500">Supervisor de Planta</div>
+                    <div className="border-t border-gray-400 pt-2 font-bold text-sm text-gray-800 uppercase">
+                      Roberto Gomez
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Supervisor de Planta
+                    </div>
                   </div>
                 </div>
-
               </div>
             </div>
 
             {/* BOTONES DE ACCIÓN (ESTILO IMAGEN) */}
             <div className="bg-white p-6 border-t flex justify-end gap-3 items-center">
-              <button 
+              <button
                 onClick={() => setIsSuccessModalOpen(false)}
                 className="px-8 py-2.5 bg-white border border-gray-300 text-gray-600 rounded font-bold hover:bg-gray-50 transition-all uppercase text-xs"
               >
                 Cerrar
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => {
                   generarInformeIndividual(lastCreatedOrder);
                   setIsSuccessModalOpen(false);
@@ -476,16 +843,28 @@ export default function Mantenimiento() {
           <h4 className="font-bold text-sm uppercase">Responsable</h4>
           <p className="text-blue-600 font-bold text-lg">CARLOS MANTILLA</p>
         </div>
-        <button onClick={exportarInformePDF} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-bold flex gap-2">
+        <button
+          onClick={exportarInformePDF}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-bold flex gap-2"
+        >
           <FileText size={18} /> GENERAR INFORME GENERAL
         </button>
       </div>
     </div>
-    </AuthGuard>
-  )
+  );
 }
 
-function StatCard({ icon, label, value, color }: { icon: any, label: string, value: string, color: string }) {
+function StatCard({
+  icon,
+  label,
+  value,
+  color,
+}: {
+  icon: any;
+  label: string;
+  value: string;
+  color: string;
+}) {
   return (
     <div className="bg-white p-4 rounded-xl shadow-sm border flex items-center gap-4 hover:shadow-md transition-shadow">
       <div className={`p-3 ${color} rounded-lg`}>{icon}</div>
@@ -494,6 +873,5 @@ function StatCard({ icon, label, value, color }: { icon: any, label: string, val
         <h3 className="text-2xl font-bold">{value}</h3>
       </div>
     </div>
-  )
-  
+  );
 }

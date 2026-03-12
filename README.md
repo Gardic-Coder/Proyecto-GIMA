@@ -4,33 +4,74 @@ Bienvenido al repositorio central de **Proyecto-GIMA**. Este entorno utiliza con
 
 ---
 
-## 🛠️ Inicialización del Proyecto
+## 🚀 Guía de Instalación y Despliegue Rápido
 
-Sigue estos pasos para configurar tu entorno por primera vez:
+Para facilitar la colaboración, el proyecto cuenta con un script de inicialización automática que se encarga de crear las variables de entorno, mapear los puertos, descargar las dependencias y orquestar todo a través de Docker.
 
-1. **Variables de Entorno del Ecosistema:**
-   En la raíz del proyecto, crea un archivo `.env` basado en el ejemplo para configurar la Base de Datos en Docker:
+### 📋 Requisitos Previos
 
-- Copia el archivo: `cp .env.example .env` (o créalo manualmente).
-- Define tus credenciales de PostgreSQL en este archivo. El `docker-compose.yml` las leerá automáticamente.
+El único requisito estricto para levantar el proyecto es contar con:
 
-2. **Variables de Entorno del Backend:**
-   Entra a la carpeta `backend/` y prepara su configuración:
+- **[Docker](https://docs.docker.com/get-docker/)** instalado y ejecutándose en tu máquina.
+- Si usas Windows, se recomienda tener configurado **WSL2** en Docker Desktop.
 
-- `cp backend/.env.example backend/.env`
-- **Importante:** Asegúrate de que los valores de `DB_DATABASE`, `DB_USERNAME` y `DB_PASSWORD` coincidan con los que pusiste en el `.env` de la raíz. El `DB_HOST` debe ser `db`.
+---
 
-3. **Levantar Contenedores:**
+### 🐧 Instrucciones para Linux o macOS
 
-- **Linux/macOS:** `docker compose up -d --build`
-- **Windows:** `docker-compose up -d --build`
+1. Clona el repositorio y navega hasta la carpeta raíz del proyecto:
+   ```bash
+      git clone <url-de-tu-repositorio>
+      cd proyecto-gima
+   ```
+2. Otorga permisos de ejecución al script de configuración:
+   ```bash
+      chmod +x setup.sh
+   ```
+3. Ejecuta el script:
+   ```bash
+      ./setup.sh
+   ```
+4. Sigue las instrucciones interactivas en la consola. El script te pedirá:
+   - Los puertos que deseas usar (puedes dejar los que vienen por defecto pulsando Enter).
+   - Credenciales para la base de datos.
+   - Tus API Keys de IA (Si no sabes cómo obtenerlas, escribe HELP cuando el script te lo solicite para ver un paso a paso).
 
-4. **Migraciones y Datos iniciales:**
+### 🪟 Instrucciones para Windows
+
+1. Clona el repositorio y abre una terminal de PowerShell como Administrador en la carpeta del proyecto.
+2. (Opcional) Si es la primera vez que ejecutas scripts en tu PC, deberás habilitar temporalmente la ejecución de scripts. Escribe el siguiente comando y acepta (S):
+   ```powershell
+      Set-ExecutionPolicy RemoteSigned -Scope Process
+   ```
+3. Ejecuta el script de configuración:
+   ```powershell
+      .\setup.ps1
+   ```
+4. Completa los datos solicitados en consola:
+   - Puertos de despliegue (presiona Enter para usar los valores por defecto).
+   - Credenciales para la base de datos (Soporta caracteres especiales).
+   - Tus API Keys de IA (Escribe HELP si necesitas instrucciones sobre dónde obtenerlas).
+
+---
+
+### ✅ Verificación
+
+Una vez que el script finalice, todos los contenedores estarán corriendo en segundo plano. Podrás acceder a los servicios desde tu navegador:
+
+- Frontend (Next.js): http://localhost:3000 (o el puerto que elegiste).
+- Backend API (Laravel): http://localhost:8000
+- Módulo IA: http://localhost:3001
+
+Nota: El script ejecuta las migraciones (migrate --seed) automáticamente, por lo que la base de datos ya contará con usuarios y datos de prueba.
+
+### 🛑 Posibles Soluciones a Errores (Troubleshooting)
+
+Si al levantar el proyecto la base de datos rechaza la contraseña (error password authentication failed), es probable que exista un volumen de Docker anterior haciendo conflicto. Limpia el entorno y vuelve a ejecutar el script con:
 
 ```bash
-docker compose exec app php artisan key:generate
-docker compose exec app php artisan migrate --seed
-
+   docker compose down -v
+   ./setup.sh
 ```
 
 ---

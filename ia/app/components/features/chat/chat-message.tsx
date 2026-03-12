@@ -83,7 +83,14 @@ interface ToolPart {
 function getTextContent(parts: unknown[] | undefined): string {
   if (!parts || parts.length === 0) return '';
   const textParts = parts.filter((part: any): part is TextPart => part?.type === 'text');
-  return textParts.map((part) => part.text).join('\n\n');
+  let text = textParts.map((part) => part.text).join('\n\n');
+
+  // Limpiar artefactos de llamadas a herramientas (ej. Llama 3 "función=consultar_mantenimientos>{...}")
+  // que a veces se filtran como texto antes de ser parseados correctamente.
+  text = text.replace(/(?:función|function)=[\w_]+>\{.*?\}/gi, '');
+  text = text.replace(/<tool_call>.*?<\/tool_call>/gs, '');
+
+  return text.trim();
 }
 
 function isToolPart(part: any): part is ToolPart {
@@ -111,7 +118,7 @@ const DATA_TABLE_TOOLS = new Set([
  * Collapsed by default — the user can expand if they want to read the LLM commentary.
  */
 function CollapsibleLLMText({ text }: { text: string }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
   return (
     <div className="mb-1">
@@ -153,7 +160,10 @@ export function ChatMessage({
   onToolApproval?: (approvalId: string, approved: boolean, input?: any) => void;
 }) {
   const parts = (message.parts as unknown[]) || [];
-  const textContent = getTextContent(parts);
+  let textContent = getTextContent(parts);
+
+  const isGroqSchemaError = textContent.includes('Failed to call a function') || textContent.includes('failed_generation');
+  const isQuotaError = textContent.includes('quota') || textContent.includes('Quota') || textContent.includes('Rate limit reached') || textContent.includes('limit: 0');
 
   const imageParts = parts.filter(
     (part: any): part is ImagePart => part?.type === 'image'
@@ -186,7 +196,9 @@ export function ChatMessage({
       )}
 
       {/* Texto — collapsible when tool results are present */}
-      {textContent && toolParts.length > 0 ? (
+      {isGroqSchemaError || isQuotaError ? (
+        <ToolErrorCard error={textContent} />
+      ) : textContent && toolParts.length > 0 ? (
         <CollapsibleLLMText text={textContent} />
       ) : textContent ? (
         <MessageContent>
@@ -203,13 +215,12 @@ export function ChatMessage({
           return <ToolLoadingCard key={key} toolName={part.type} />;
         }
 
-        // Error state
+        // Error state — show friendly gray message, log raw error to console
         if (part.state === 'output-error') {
           return (
             <ToolErrorCard
               key={key}
               error={part.errorText || 'Error desconocido'}
-              suggestion="Intenta reformular tu consulta"
             />
           );
         }
