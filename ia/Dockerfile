@@ -9,11 +9,11 @@ COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
 # Instalar dependencias
 RUN npm install
 
-# Copiar el resto del código del proyecto
+# Copiar el resto del código
 COPY . .
 
-# Exponer el puerto por defecto de Next.js
+# Exponer el puerto
 EXPOSE 3000
 
-# Comando para iniciar la aplicación en modo desarrollo
+# Comando para iniciar
 CMD ["npm", "run", "dev"]

@@ -1,12 +1,14 @@
 "use client"; 
 
 import { useContext, useState, useEffect, useRef } from 'react';
-import { Search, Bell, Menu, Check, Clock } from 'lucide-react';
+import { Search, Bell, Menu, Check, Clock, User } from 'lucide-react';
 import { sidebarContext } from '../ui/sidebarContext';
 import { notificacionService, Notificacion } from '@/services/notificacionService';
+import { useAuth } from "@/context/AuthContext";
 
 export default function Header() {
   const { toggleSidebar } = useContext(sidebarContext);
+  const { user } = useAuth();
   
   // --- ESTADOS ---
   const [notifications, setNotifications] = useState<Notificacion[]>([]);
@@ -102,6 +104,22 @@ export default function Header() {
                </span>
              )}
           </button>
+
+        {/* Perfil Usuario */}
+        <div className="flex items-center gap-3 border-l border-gray-200 pl-4">
+          <div className="text-right hidden md:block">
+            <p className="text-sm font-bold text-gray-900">
+              {user?.name || 'Cargando...'}
+            </p>
+            <p className="text-xs text-gray-500 capitalize">
+              {user?.roles_asignados?.[0] || 'Usuario'}
+            </p>
+          </div>
+
+          <button className="p-2.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-full transition border border-blue-100">
+            <User className="w-6 h-6" />
+          </button>
+        </div>
 
           {/* DROPDOWN PANEL */}
           {isOpen && (

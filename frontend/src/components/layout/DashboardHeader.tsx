@@ -1,9 +1,7 @@
 "use client"
 
-import { Bell, User, Search } from "lucide-react"
+import { User, Search } from "lucide-react"
 import { usePathname } from "next/navigation"
-// 1. Importamos tu contexto de autenticación
-import { useAuth } from "@/context/AuthContext"
 
 interface DashboardHeaderProps {
   title?: string
@@ -14,9 +12,7 @@ interface DashboardHeaderProps {
 export function DashboardHeader({ title, subtitle = "Bienvenido al panel GIMA" , showSearch = true }: DashboardHeaderProps) {
 
   const pathname = usePathname()
-  // 2. Extraemos el usuario de la sesión actual
-  const { user } = useAuth() 
-  
+
 
   const pathParts = pathname.split("/").filter((part) => part)
   const lastPart = pathParts.length > 0 ? pathParts[pathParts.length - 1] : "Dashboard"
@@ -44,24 +40,7 @@ export function DashboardHeader({ title, subtitle = "Bienvenido al panel GIMA" ,
           </div>
         )}
 
-          {/* Notifications */}
-          <button className="relative p-2.5 text-gray-600 hover:bg-gray-100 rounded-full transition">
-            <Bell className="w-6 h-6" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-          </button>
 
-          {/* Profile (AQUÍ ESTÁ LA CONEXIÓN CON LOS DATOS) */}
-          <div className="flex items-center gap-3 ml-2 border-l border-gray-200 pl-4">
-            <div className="text-right hidden md:block">
-              {/* Leemos "name" y "roles_asignados" de Laravel */}
-              <p className="text-sm font-bold text-gray-900">{user?.name || 'Cargando...'}</p>
-              <p className="text-xs text-gray-500 capitalize">{user?.roles_asignados?.[0] || 'Usuario'}</p>
-            </div>
-            <button className="p-2.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-full transition border border-blue-100">
-              <User className="w-6 h-6" />
-            </button>
-          </div>
-          
         </div>
       </div>
     </div>

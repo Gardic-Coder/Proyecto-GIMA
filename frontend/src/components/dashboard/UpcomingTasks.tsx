@@ -10,7 +10,7 @@ export function UpcomingTasks({ tareas = [], cargando }: UpcomingTasksProps) {
     <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm w-full">
       <div className="flex items-center gap-3 mb-6">
         <h3 className="text-lg font-bold text-gray-900 uppercase tracking-tight">
-          Próximos mantenimientos preventivos {cargando && <span className="text-sm font-normal text-gray-400 lowercase ml-2">(Cargando...)</span>}
+          Próximos mantenimientos {cargando && <span className="text-sm font-normal text-gray-400 lowercase ml-2">(Cargando...)</span>}
         </h3>
       </div>
 

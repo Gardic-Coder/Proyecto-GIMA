@@ -11,8 +11,8 @@ RUN npm install
 # Copiamos el resto del código
 COPY . .
 
-# Exponemos el puerto por defecto de Next.js
+# Exponer el puerto
 EXPOSE 3000
 
-# Comando para iniciar en modo desarrollo
+# Comando para iniciar
 CMD ["npm", "run", "dev"]

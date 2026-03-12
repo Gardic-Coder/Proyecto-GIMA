@@ -44,7 +44,6 @@ services:
       - app
     networks:
       - gima-network
-    
   # Módulo de Inteligencia Artificial
   ia:
     build:
@@ -72,5 +71,3 @@ networks:
 
 volumes:
   postgres_data:
-
-
