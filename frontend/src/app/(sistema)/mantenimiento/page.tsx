@@ -50,16 +50,6 @@ export default function Mantenimiento() {
     estado: "pendiente" as OrdenEstado,
   });
 
-  // const totalPendientes = ordenes.filter(
-  //   (o) => o.estado === "pendiente",
-  // ).length;
-  // const totalEnProceso = ordenes.filter(
-  //   (o) => o.estado === "en-proceso",
-  // ).length;
-  // const totalCompletadas = ordenes.filter(
-  //   (o) => o.estado === "completada",
-  // ).length;
-
   const ordenesFiltradas = ordenes.filter((orden) => {
     const nombreTecnico = orden.tecnicoNombre.toLowerCase();
     const busqueda = searchTerm.toLowerCase();
@@ -73,13 +63,6 @@ export default function Mantenimiento() {
         const [dataBackend] = await Promise.all([
           mantenimientoService.getMantenimientos(currentPage),
         ]);
-
-        // setStats({
-        //   pendientes: dataStats.pendientes,
-        //   enProceso: dataStats.en_proceso,
-        //   completadas: dataStats.completadas,
-        // });
-
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const ordenesAdaptadas: Orden[] = dataBackend.data.map((item: any) => {
