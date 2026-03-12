@@ -71,7 +71,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // ==========================================
 
     // 1. Main Dashboard (Exclusivo para Admin y Supervisor)
-    Route::middleware(['role:admin|supervisor'])->prefix('dashboard/main')->group(function () {
+    Route::middleware(['role:admin|supervisor|reporter|tecnico'])->prefix('dashboard/main')->group(function () {
 
         Route::get('/estadisticas', [MainDashboardController::class, 'estadisticasGenerales']);
         Route::get('/activos-estado', [MainDashboardController::class, 'barraActivos']);
