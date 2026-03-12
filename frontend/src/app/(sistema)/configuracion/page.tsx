@@ -9,7 +9,7 @@ import {
   Bell,
   User,
   Search,
-  Globe, // Changed to Globe as MapPin is not available in the context
+  Globe,
 } from "lucide-react";
 import AuthGuard from "@/components/AuthGuard";
 
@@ -22,10 +22,8 @@ interface ConfigCardProps {
         {/* Configuración de las cards */}
 const ConfigCard: React.FC<ConfigCardProps> = ({ title, desc, icon, href }) => {
   const cardContent = (
-    <div className="bg-white rounded-2xl p-8 min-h-[180px] shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col gap-4">
-           
-            {/* Icono */}
-      <div className="h-16 w-16 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600">
+    <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition cursor-pointer flex gap-4 items-start h-full">
+      <div className="h-10 w-10 rounded-xl bg-gray-100 flex items-center justify-center text-slate-700 shrink-0">
         {icon}
       </div>
       {/* Texto */}
@@ -51,17 +49,17 @@ const ConfigCard: React.FC<ConfigCardProps> = ({ title, desc, icon, href }) => {
 export default function ConfiguracionPage() {
   return (
     <AuthGuard roleRequired={["admin"]}>
-    <section className="p-24">
+    <section className="p-4 md:p-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-24">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 mb-6 md:mb-8">
         <h1 className="text-2xl font-bold text-black">Configuración</h1>
-      {/* Barra de búsqueda */}
-        <div className="relative">
+
+        <div className="relative w-full sm:w-auto">
           <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
           <input
             type="text"
             placeholder="Buscar"
-            className="pl-10 pr-4 py-2 rounded-full border bg-white outline-none"
+            className="w-full pl-10 pr-4 py-2 rounded-full border bg-white outline-none focus:border-gray-300 transition-colors"
           />
         </div>
       </div>

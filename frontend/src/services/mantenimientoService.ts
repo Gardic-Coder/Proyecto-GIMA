@@ -23,5 +23,9 @@ export const mantenimientoService = {
         return response.data;
     },
 
+    async getEstadisticasResumen() {
+        const response = await api.get('/mantenimiento/estadisticas');
+        return response.data;
+    }
 };
 

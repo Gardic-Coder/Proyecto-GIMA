@@ -24,6 +24,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { mantenimientoService } from "@/services/mantenimientoService";
 
+
 // Interface extendida para campos personalizados
 interface Orden extends OrdenBase {
   notas?: string;
@@ -93,13 +94,14 @@ export default function Mantenimiento() {
       try {
         const [dataBackend, dataStats] = await Promise.all([
           mantenimientoService.getMantenimientos(currentPage),
+          mantenimientoService.getEstadisticasResumen(),
         ]);
 
-        // setStats({
-        //   pendientes: dataStats.pendientes,
-        //   enProceso: dataStats.en_proceso,
-        //   completadas: dataStats.completadas,
-        // });
+        setStats({
+          pendientes: dataStats.pendientes,
+          enProceso: dataStats.en_proceso,
+          completadas: dataStats.completadas,
+        });
 
 
         const ordenesAdaptadas: Orden[] = dataBackend.data.map((item: any) => {
