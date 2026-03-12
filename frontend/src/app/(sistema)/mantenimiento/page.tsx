@@ -1,27 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import {
-  Plus,
-  Wrench,
-  Clock,
-  CheckCircle,
-  X,
-  Search,
-  FileText,
-  Download,
-  CalendarDays,
-} from "lucide-react";
-import { mockTecnicos } from "@/utils/mockMantenimiento";
-import {
-  Orden as OrdenBase,
-  OrdenEstado,
-  TipoMantenimiento,
-  Prioridad,
-} from "@/types/mantenimiento";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import { useEffect, useState } from "react"
+import Link from "next/link"
+import { Plus, Wrench, Clock, CheckCircle, X, Search, FileText, Download, CalendarDays } from "lucide-react"
+import { mockTecnicos, mockOrdenes } from "@/utils/mockMantenimiento"
+import { Orden as OrdenBase, OrdenEstado, TipoMantenimiento, Prioridad } from '@/types/mantenimiento'
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import AuthGuard from "@/components/AuthGuard"
 import { mantenimientoService } from "@/services/mantenimientoService";
 
 // Interface extendida para campos personalizados
